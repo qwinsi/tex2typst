@@ -4,7 +4,7 @@
   "description": "JavaScript library for converting TeX code to Typst",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "repository": "git@github.com:qwinsi/tex2typst.git",
+  "repository": "https://github.com/qwinsi/tex2typst",
   "author": "wwc936 <wwc936@outlook.com>",
   "license": "MIT",
   "keywords": [
