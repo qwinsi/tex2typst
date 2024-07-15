@@ -3,7 +3,7 @@ import yaml from 'js-yaml';
 import path from 'node:path';
 import fs from 'node:fs';
 import { parseTex, KatexNodeToTexNodeError } from '../src/parser';
-import { tex2typst } from '../src/converter';
+import { tex2typst } from '../src/index';
 import { TypstWriterError } from '../src/writer';
 import { TexNode } from '../src/types';
 
