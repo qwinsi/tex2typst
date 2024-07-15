@@ -12,7 +12,7 @@ npm install tex2typst
 ```javascript
 import { parseTex, tex2typst } from 'tex2typst';
 
-const output = tex2typst("\\zeta(s) = \sum_{n=1}^{\\infty}\\frac{1}{n^s}");
+const output = tex2typst("\\zeta(s) = \\sum_{n=1}^{\\infty}\\frac{1}{n^s}");
 console.log(output);
 // zeta(s) = sum_(n = 1)^infinity frac(1, n^s)
 ```
