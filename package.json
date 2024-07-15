@@ -1,0 +1,9 @@
+{
+  "name": "tex2typst",
+  "version": "0.0.1",
+  "description": "JavaScript library for converting TeX math formula code to Typst",
+  "main": "index.js",
+  "repository": "git@github.com:qwinsi/tex2typst.git",
+  "author": "wwc936 <wwc936@outlook.com>",
+  "license": "MIT"
+}
