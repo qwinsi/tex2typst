@@ -1,0 +1,237 @@
+# Most test cases are from https://github.com/curvenote/tex-to-typst/blob/1d0b121d162911f1c99b47171939e30656f49270/tests/math.yml (MIT License)
+title: tex2typst
+cases:
+  - title: Integrals and vec
+    tex: '\nabla \cdot \vec{j}(p) = \lim_{v \to \{ p \}} = \int \int_{S(v)} \frac{\vec{j} \cdot \vec{n}}{v} dS'
+    typst: nabla dot.op arrow(j)(p) = lim_(v arrow.r {p}) = integral integral_(S(v)) frac(arrow(j) dot.op arrow(n), v) d S
+  - title: Fractions and vectors
+    tex: '\frac{1}{4} \sum_{i=1}^4 \mathbf{P}_i^\top \sqrt{v} \mathbf{\Sigma}^{-1} \sqrt{v} \mathbf{P}_i \mathbf{j} = \mathbf{D}^\top v \phi'
+    typst: frac(1, 4) sum_(i = 1)^4 bold(P)_i^top sqrt(v) bold(Sigma)^(-1) sqrt(v) bold(P)_i bold(j) = bold(D)^top v phi.alt
+  - title: Testing factorial, no space
+    tex: 'p ( x )   =    \frac{e^{-\lambda}\lambda^{x}}{ x ! }'
+    typst: p(x) = frac(e^(-lambda) lambda^x, x!)
+  - title: Mathrm
+    tex: 'p_e = 1-\mathrm{e}^{-t \lambda}'
+    typst: p_e = 1 - upright(e)^(-t lambda)
+  - title: Mathrm multiple
+    note: The text comes in as an argument but in one string, which needs to be treated differently
+    tex: 'f(x_t, \mathrm{left})'
+    typst: f(x_t, upright(l e f t))
+  - title: Cube root
+    tex: '\sqrt[3]{x}'
+    typst: root(3, x)
+  - title: Simplified brackets
+    tex: 'e_f(x)'
+    typst: e_f (x)
+  - title: Simplified brackets f(x)
+    note: This doesn't actually need the extra brackets, but it is clearer!
+    tex: 'e_{f(x)}'
+    typst: e_(f(x))
+  - title: Text Functions
+    tex: '\text{diag}({\mathbf{v}}) \mathbf{D}\mathbf{M}_f(\sigma^{-1})^{-1}\mathbf{D}^\top\text{diag}({\mathbf{v}})\phi = \mathbf{q}'
+    typst: '"diag"(bold(v)) bold(D) bold(M)_f (sigma^(-1))^(-1) bold(D)^top "diag"(bold(v)) phi.alt = bold(q)'
+  - title: Single Char Text
+    tex: \text{a}
+    typst: '"a"'
+  - title: Plus minus
+    tex: 'q = \pm I'
+    typst: q = plus.minus I
+  - title: Comma inside function
+    tex: '\mathbf{j_x, j_y}'
+    typst: 'bold(j_x comma j_y)'
+  - title: Nested scripts
+    tex: 'r_{s^+}'
+    typst: 'r_(s^+)'
+  - title: Nested functions
+    tex: '\mathbf{m}_\text{ref}'
+    typst: 'bold(m)_("ref")'
+  - title: left and right brackets
+    tex: '\left[ \mathbf{A} \right)'
+    typst: 'lr([ bold(A)))'
+  - title: operatorname
+    tex: '\operatorname{diag} \text{diag}'
+    typst: 'op("diag") "diag"'
+  - title: operatorname1
+    tex: '\operatorname{a}'
+    typst: op("a")
+  - title: scripts
+    tex: '\mathbf{k}_{Av} \mathbf{k}^{Av}'
+    typst: 'bold(k)_(A v) bold(k)^(A v)'
+  - title: scripts
+    tex: |-
+      \mathbf{D}
+      \\
+      \mathbf{G}_{z}
+    typst: |-
+      bold(D) \
+      bold(G)_z
+  - title: Complex equations with nested over/under braces
+    tex: |-
+      \begin{align*}
+      \overbrace{
+          \left[
+              \frac{1}{\Delta t}
+              \frac{\partial \boldsymbol{\theta}^{n+1}}{\partial\boldsymbol{\psi}^{n+1}}
+              -\mathbf{D}
+              \text{diag}\left( \mathbf{G} \boldsymbol{\psi}^{n+1} \right)
+              \frac{\partial \mathbf{k}_{Av}}{\partial\boldsymbol{\psi}^{n+1}}
+              -\mathbf{D}
+              \text{diag}\left( \mathbf{k}_{Av}(\boldsymbol{\psi}^{n+1},\mathbf{m}) \right)
+              \mathbf{G}
+              - \mathbf{G}_{z}
+              \frac{\partial \mathbf{k}_{Av}}{\partial\boldsymbol{\psi}^{n+1}}
+          \right]
+      }^{\mathbf{A}_0(\boldsymbol{\psi}^{n+1})}
+      \frac{\partial \boldsymbol{\psi}^{n+1}}{\partial\mathbf{m}}
+      \nonumber\\
+      +
+      \underbrace{
+          \left[
+              -\frac{1}{\Delta t}
+              \frac{\partial \boldsymbol{\theta}^n}{\partial\boldsymbol{\psi}^n}
+          \right]
+      }_{\mathbf{A}_{-1}(\boldsymbol{\psi}^n)}
+      \frac{\partial \boldsymbol{\psi}^n}{\partial\mathbf{m}}
+      =
+      \underbrace{
+      \left[
+          -\mathbf{D}
+          \text{diag}\left( \mathbf{G} \boldsymbol{\psi}^{n+1} \right)
+          \frac{\partial \mathbf{k}_{Av}}{\partial\mathbf{m}}
+          -\mathbf{G}_{z}
+          \frac{\partial \mathbf{k}_{Av}}{\partial\mathbf{m}}
+      \right]
+      }_{\mathbf{B}(\psi^{n+1})}&
+      \end{align*}
+    typst: |-
+      overbrace([ frac(1, Delta t) frac(diff bold(theta)^(n + 1), diff bold(psi)^(n + 1)) - bold(D) "diag"(bold(G) bold(psi)^(n + 1)) frac(diff bold(k)_(A v), diff bold(psi)^(n + 1)) - bold(D) "diag"(bold(k)_(A v)(bold(psi)^(n + 1) comma bold(m))) bold(G) - bold(G)_z frac(diff bold(k)_(A v), diff bold(psi)^(n + 1)) ], bold(A)_0 (bold(psi)^(n + 1))) frac(diff bold(psi)^(n + 1), diff bold(m)) \
+      + underbrace([ -frac(1, Delta t) frac(diff bold(theta)^n, diff bold(psi)^n) ], bold(A)_(-1)(bold(psi)^n)) frac(diff bold(psi)^n, diff bold(m)) = underbrace([ -bold(D) "diag"(bold(G) bold(psi)^(n + 1)) frac(diff bold(k)_(A v), diff bold(m)) - bold(G)_z frac(diff bold(k)_(A v), diff bold(m)) ], bold(B)(psi^(n + 1))) &
+  - title: leading underscore
+    tex: _2
+    typst: '""_2'
+  - title: leading power
+    tex: '^{\text{st}}'
+    typst: '""^("st")'
+  - title: sim symbol
+    tex: 'a \sim b'
+    typst: a tilde b
+  - title: greater than
+    tex: 'a \ge b'
+    typst: a gt.eq b
+  - title: mathbb
+    tex: '\mathbb{R}'
+    typst: RR
+  - title: mathbb for others
+    tex: '\mathbb{1 \alpha}'
+    typst: bb(1 alpha)
+  - title: mathbb for other
+    tex: '\mathbb{a}'
+    typst: 'bb(a)'
+  - title: ddot
+    tex: 'q, \dot{q}, \ddot{q}'
+    typst: q, dot(q), dot.double(q)
+  - title: mat
+    tex: 'x(t) = \left[ \begin{array}{c} q(t) & x \\ \dot{q}(t) & x \end{array}\right]'
+    typst: 'x(t) = [ mat(delim: #none, q(t), x; dot(q)(t), x) ]'
+  - title: brackets
+    tex: '\frac{1}{\tau(X_2)}'
+    typst: 'frac(1, tau(X_2))'
+  - title: bar and nested bb
+    tex: '\mathbb{\bar{R}}'
+    typst: 'bb(macron(R))'
+  - title: Underscore with no content
+    tex: 'P_{}^{1}'
+    typst: 'P_()^1'
+  - title: Simple overbrace
+    tex: '\overbrace{a}^{b}'
+    typst: 'overbrace(a, b)'
+  - title: underbrace
+    tex: '\underbrace{a}_{b}'
+    typst: underbrace(a, b)
+  - title: Test
+    tex: a^{b^{n+1}}
+    typst: a^(b^(n + 1))
+  - title: Test2
+    tex: a+b^1 + \frac{2}{3} + \overbrace{123}^{b}
+    typst: a + b^1 + frac(2, 3) + overbrace(123, b)
+  - title: Symbols
+    tex: '\alpha \nabla \partial'
+    typst: alpha nabla diff
+  - title: Align
+    tex: |-
+      \begin{align*}
+      a &= b \\
+      c &= d
+      \end{align*}
+    typst: |-
+      a & = b \
+      c & = d
+  - title: Aligned
+    tex: |-
+      \begin{aligned}
+      a &= b \\
+      c &= d
+      \end{aligned}
+    typst: |-
+      a & = b \
+      c & = d
+  - title: Aligned2
+    tex: |-
+      \begin{aligned}
+      &a &= b \\
+      &c &= d
+      \end{aligned}
+    typst: |-
+      & a & = b \
+      & c & = d
+  - title: Matrix
+    tex: |-
+      m = \begin{matrix}
+      a &= b \\
+      c &= d
+      \end{matrix}
+    typst: 'm = mat(delim: #none, a, = b; c, = d)'
+  - title: Matrix2
+    tex: |-
+      \begin{matrix}
+      &a &= b \\
+      &c &= d
+      \end{matrix}
+    typst: 'mat(delim: #none, a, = b; c, = d)'
+  - title: Array
+    tex: |-
+      \begin{array}{cc}
+      a & b \\
+      c & d
+      \end{array}
+    typst: 'mat(delim: #none, a, b; c, d)'
+  - title: Test3
+    tex: \boldsymbol{x}
+    typst: bold(x)
+  - title: Test4
+    tex: a^2 + b^2 = c^2
+    typst: a^2 + b^2 = c^2
+  - title: Euler Complex Exponential
+    tex: e^{i\theta} = \cos \theta + i \sin \theta
+    typst: e^(i theta) = cos theta + i sin theta
+  - title: Euler Product
+    tex: \prod_{p} \frac{1}{1-p^{-s}}= \sum _{n=1}^{\infty} \frac{1}{n^s}
+    typst: product_p frac(1, 1 - p^(-s)) = sum_(n = 1)^infinity frac(1, n^s)
+  - title: Test5
+    tex: "{a+b}^2"
+    typst: (a + b)^2
+  - title: Test6
+    tex: 1 + {a + b} + c
+    typst: 1 + a + b + c
+  - title: Test7
+    tex: (a + b)^2
+    typst: (a + b)^2
+  - title: lr
+    tex: \left| a + \frac{1}{3} \right|^2
+    typst: lr(|a + frac(1, 3)|)^2
+  - title: leading minus sign
+    tex: a^{-s}
+    typst: a^(-s)
+  - title: Test8
+    tex: \sqrt{\frac{1}{x^2 + y^2}}
+    typst: sqrt(frac(1, x^2 + y^2))
