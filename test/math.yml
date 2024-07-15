@@ -235,3 +235,9 @@ cases:
   - title: Test8
     tex: \sqrt{\frac{1}{x^2 + y^2}}
     typst: sqrt(frac(1, x^2 + y^2))
+  - title: basic prime case
+    tex: y'
+    typst: y'
+  - title: has both prime and subscript
+    tex: y_1' + y'_2 + y_{a_1}' + {\theta}_1'
+    typst: y'_1 + y'_2 + y'_(a_1) + theta'_1
