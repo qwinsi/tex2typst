@@ -28,6 +28,8 @@ export class TypstWriter {
             no_need_space ||= /[\(\|]$/.test(this.buffer) && /^\w/.test(str);
             // putting punctuation
             no_need_space ||= /^[}()_^,;!\|]$/.test(str);
+            // putting a prime
+            no_need_space ||= str === "'";
             // continue a number
             no_need_space ||= /[0-9]$/.test(this.buffer) && /^[0-9]/.test(str);
             // leading sign
@@ -84,11 +86,20 @@ export class TypstWriter {
 
 
             let trailing_space_needed = false;
+            const has_prime = (sup && sup.type === 'symbol' && sup.content === '\\prime');
+            if (has_prime) {
+                // Put prime symbol before '_'. Because $y_1'$ is not displayed properly in Typst (so far)
+                // e.g. 
+                // y_1' -> y'_1
+                // y_{a_1}' -> y'_{a_1}
+                this.queue.push({ type: 'atom', content: '\''});
+                trailing_space_needed = false;
+            }
             if (sub) {
                 this.queue.push({ type: 'atom', content: '_'});
                 trailing_space_needed = this.appendWithBracketsIfNeeded(sub);
             }
-            if (sup) {
+            if (sup && !has_prime) {
                 this.queue.push({ type: 'atom', content: '^'});
                 trailing_space_needed = this.appendWithBracketsIfNeeded(sup);
             }
