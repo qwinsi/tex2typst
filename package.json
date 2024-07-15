@@ -1,9 +1,19 @@
 {
   "name": "tex2typst",
   "version": "0.0.1",
-  "description": "JavaScript library for converting TeX math formula code to Typst",
+  "description": "JavaScript library for converting TeX code to Typst",
   "main": "index.js",
   "repository": "git@github.com:qwinsi/tex2typst.git",
   "author": "wwc936 <wwc936@outlook.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.3",
+    "rimraf": "^3.0.2",
+    "vitest": "^2.0.2"
+  }
 }
