@@ -1,6 +1,10 @@
 # tex2typst
 JavaScript library for converting TeX math formula code to Typst
 
+## Try it online
+
+A Web UI wrapper is available at [https://qwinsi.github.io/tex2typst-webapp/](https://qwinsi.github.io/tex2typst-webapp/).
+
 ## Installation
 
 ```bash
