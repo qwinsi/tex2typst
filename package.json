@@ -2,11 +2,14 @@
   "name": "tex2typst",
   "version": "0.0.1",
   "description": "JavaScript library for converting TeX code to Typst",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "repository": "git@github.com:qwinsi/tex2typst.git",
   "author": "wwc936 <wwc936@outlook.com>",
   "license": "MIT",
   "scripts": {
+    "prebuild": "rimraf dist/",
+    "build": "tsc --project ./tsconfig.json --outDir dist --declaration",
     "test": "vitest run"
   },
   "devDependencies": {
