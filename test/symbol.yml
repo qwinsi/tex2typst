@@ -1,0 +1,78 @@
+title: Symbol Map
+cases:
+  - title: backslash
+    tex: \backslash
+    typst: backslash
+  - title: lowercase Greek alphabet
+    tex: \alpha \beta \gamma \delta \epsilon \zeta \eta \theta \iota \kappa \lambda \mu \nu \xi \omicron \pi \rho \sigma \tau \upsilon \phi \chi \psi \omega
+    typst: alpha beta gamma delta epsilon.alt zeta eta theta iota kappa lambda mu nu xi omicron pi rho sigma tau upsilon phi.alt chi psi omega
+  - title: lowercase Greek letter variants
+    tex: \varepsilon \vartheta \varpi \varrho \varsigma \varphi
+    typst: epsilon theta.alt pi.alt rho.alt sigma.alt phi
+  - title: uppercase Greek alphabet
+    tex: \Gamma \Delta \Theta \Lambda \Xi \Pi \Sigma \Upsilon \Phi \Psi \Omega
+    typst: Gamma Delta Theta Lambda Xi Pi Sigma Upsilon Phi Psi Omega
+  - title: uppercase of all lowercase Greek letters
+    tex: \Alpha \Beta \Gamma \Delta \Epsilon \Zeta \Eta \Theta \Iota \Kappa \Lambda \Mu \Nu \Xi \Omicron \Pi \Rho \Sigma \Tau \Upsilon \Phi \Chi \Psi \Omega
+    # Ideally it should be Alpha Beta ... But the KaTeX parser gives us \mathrm{A} \mathrm{B} ... So we have to compromise for now
+    typst: upright(A) upright(B) Gamma Delta upright(E) upright(Z) upright(H) Theta upright(I) upright(K) Lambda upright(M) upright(N) Xi upright(O) Pi upright(P) Sigma upright(T) Upsilon Phi upright(X) Psi Omega
+  - title: mathbb
+    tex: \mathbb{A} \mathbb{B} \mathbb{C} \mathbb{D} \mathbb{E} \mathbb{F} \mathbb{G} \mathbb{H} \mathbb{I} \mathbb{J} \mathbb{K} \mathbb{L} \mathbb{M} \mathbb{N} \mathbb{O} \mathbb{P} \mathbb{Q} \mathbb{R} \mathbb{S} \mathbb{T} \mathbb{U} \mathbb{V} \mathbb{W} \mathbb{X} \mathbb{Y} \mathbb{Z}
+    typst: AA BB CC DD EE FF GG HH II JJ KK LL MM NN OO PP QQ RR SS TT UU VV WW XX YY ZZ
+  - title: mathbb for others
+    tex: \mathbb{1 \alpha}
+    typst: bb(1 alpha)
+  - title: mathcal
+    tex: \mathcal{A} \mathcal{B} \mathcal{C} \mathcal{D} \mathcal{E} \mathcal{F} \mathcal{G} \mathcal{H} \mathcal{I} \mathcal{J} \mathcal{K} \mathcal{L} \mathcal{M} \mathcal{N} \mathcal{O} \mathcal{P} \mathcal{Q} \mathcal{R} \mathcal{S} \mathcal{T} \mathcal{U} \mathcal{V} \mathcal{W} \mathcal{X} \mathcal{Y} \mathcal{Z}
+    typst: cal(A) cal(B) cal(C) cal(D) cal(E) cal(F) cal(G) cal(H) cal(I) cal(J) cal(K) cal(L) cal(M) cal(N) cal(O) cal(P) cal(Q) cal(R) cal(S) cal(T) cal(U) cal(V) cal(W) cal(X) cal(Y) cal(Z)
+  - title: mathscr
+    tex: \mathscr{A} \mathscr{B} \mathscr{C} \mathscr{D} \mathscr{E} \mathscr{F} \mathscr{G} \mathscr{H} \mathscr{I} \mathscr{J} \mathscr{K} \mathscr{L} \mathscr{M} \mathscr{N} \mathscr{O} \mathscr{P} \mathscr{Q} \mathscr{R} \mathscr{S} \mathscr{T} \mathscr{U} \mathscr{V} \mathscr{W} \mathscr{X} \mathscr{Y} \mathscr{Z}
+    # This result it not proper. Try to make it better
+    typst: cal(A) cal(B) cal(C) cal(D) cal(E) cal(F) cal(G) cal(H) cal(I) cal(J) cal(K) cal(L) cal(M) cal(N) cal(O) cal(P) cal(Q) cal(R) cal(S) cal(T) cal(U) cal(V) cal(W) cal(X) cal(Y) cal(Z)
+  - title: mathrm
+    tex: \mathrm{a} \rm{a}
+    typst: upright(a) upright(a)
+  # - title: pmb
+  #   tex: \pmb{a}
+  #   typst: bold(a)
+  - title: variants of plus,minus,times,divide
+    tex: \pm \mp \oplus \boxplus \otimes \boxtimes
+    typst: plus.minus minus.plus xor plus.square times.circle times.square
+  - title: symbols about mathematical logic
+    tex: \neg \land \lor
+    typst: not and or
+  - title: symbols about sets
+    tex: \in \subset \subseteq
+    typst: in subset subset.eq
+  - title: empty set
+    tex: \varnothing
+    typst: diameter
+  - title: symbols about comparing numbers and order relations
+    # prec.eq and succ.eq don't looks like \preceq and \succeq
+    tex: \neq \leq \geq \ll \gg \prec \succ \preceq \succeq
+    typst: eq.not lt.eq gt.eq lt.double gt.double prec succ prec.eq succ.eq
+  - title: symbols about differential
+    # TODO: \mathrm{d} or \operatorname{d} -> dif
+    tex: \Delta \nabla \partial
+    typst: Delta nabla diff
+  - title: symbols about integral
+    tex: \int \oint \iint \oiint \iiint \oiiint
+    typst: integral integral.cont integral.double integral.surf integral.triple integral.vol
+  - title: big symbols used to denote accumulated operations
+    tex: \sum \prod \bigcup \bigcap \bigvee \bigwedge \bigoplus \bigotimes \bigodot \biguplus \bigsqcup
+    typst: sum product union.big sect.big or.big and.big xor.big times.circle.big dot.circle.big union.plus.big union.sq.big
+  - title: wave
+    tex: \sim \approx \cong \simeq \asymp \equiv \propto
+    typst: tilde.op approx tilde.equiv tilde.eq ≍ equiv prop
+  - title: arrows used in proofs
+    tex: \implies \iff \leftrightarrow \longleftrightarrow \rightrightarrows
+    typst: arrow.r.double.long arrow.l.r.double.long arrow.l.r arrow.l.r.long arrows.rr
+  # - title: def eq
+  #   tex: \overset{\text{def}}{=}
+  #   typst: eq.def
+  - title: combinatorial number
+    tex: \binom{n}{k}
+    typst: binom(n, k)
+  - title: left and right floor,ceil
+    tex: \lfloor \rfloor \lceil \rceil
+    typst: ⌊ ⌋ ⌈ ⌉ 
