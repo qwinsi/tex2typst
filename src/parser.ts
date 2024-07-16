@@ -51,7 +51,12 @@ export function katexNodeToTexNode(node: KatexParseNode): TexNode {
                 break;
             case 'genfrac':
                 res.type = 'binaryFunc';
-                res.content = '\\frac';
+                if (node['leftDelim'] === '(' && node['rightDelim'] === ')') {
+                    // This occurs for \binom \tbinom
+                    res.content = '\\binom';
+                } else {
+                    res.content = '\\frac';
+                }
                 res.args = [
                     katexNodeToTexNode(node['numer']),
                     katexNodeToTexNode(node['denom'])
@@ -93,6 +98,14 @@ export function katexNodeToTexNode(node: KatexParseNode): TexNode {
                 ];
                 break;
             }
+            case 'underline':
+            case 'overline': 
+                res.type = 'unaryFunc';
+                res.content = '\\' + node.type;
+                res.args = [
+                    katexNodeToTexNode(node['body'] as KatexParseNode)
+                ];
+                break;
             case 'accent': {
                 res.type = 'unaryFunc';
                 res.content = node['label']!;
@@ -169,7 +182,25 @@ export function katexNodeToTexNode(node: KatexParseNode): TexNode {
                 res.content = str;
                 break;
             }
-
+            case 'kern':
+                // This can occur for \implies, \iff. 
+                // e.g. \implies is parsed as [{type:'kern'}, {type:'atom', text:'\\Longrightarrow'}, {type:'kern'}]
+                // TODO: Ideally, we should output a single symbol \implies.
+                // But for now, we simply let the output be \Longrightarrow
+                res.type = 'empty';
+                res.content = ' ';
+                break;
+            case 'htmlmathml': {
+                // This can occur for \neq.
+                const element = (node['mathml'] as KatexParseNode[])[0]!['body']![0];
+                if (element && element.type === 'textord' && element.text === '≠') {
+                    res.type = 'symbol';
+                    res.content = '\\neq';
+                    break;
+                } else {
+                    // Fall through to throw error
+                }
+            }
             default:
                 throw new KatexNodeToTexNodeError(`Unknown node type: ${node.type}`, node);
                 break;

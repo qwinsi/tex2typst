@@ -51,7 +51,9 @@ export class TypstWriter {
     }
 
     public append(node: TexNode) {
-        if (node.type === 'ordgroup') {
+        if (node.type === 'empty') {
+            return;
+        } else if (node.type === 'ordgroup') {
             // const index = this.startBlock();
             node.args!.forEach((arg) => this.append(arg));
             // this.endBlock(index);

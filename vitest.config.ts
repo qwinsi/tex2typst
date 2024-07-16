@@ -2,6 +2,9 @@ import { defineConfig } from 'vite'
 
 export default defineConfig({
     test: {
-      forceRerunTriggers : ['./test/math.yml'],
+      forceRerunTriggers : [
+        './test/math.yml',
+        './test/symbol.yml'
+      ],
     }
   });
