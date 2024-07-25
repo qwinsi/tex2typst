@@ -12,6 +12,7 @@ type TestCase = {
   tex: string;
   typst: string;
   preferTypstIntrinsic?: boolean; // default is false
+  customTexMacros: { [key: string]: string };
 };
 
 type TestCaseFile = {
@@ -35,10 +36,11 @@ caseFiles.forEach(({ title, cases }) => {
         let tex_node: null | TexNode = null;
         let result: null | string = null;
         try {
-          tex_node = parseTex(tex);
           const settings: Tex2TypstSettings = {
-            preferTypstIntrinsic: c.preferTypstIntrinsic? c.preferTypstIntrinsic: false
+            preferTypstIntrinsic: c.preferTypstIntrinsic? c.preferTypstIntrinsic: false,
+            customTexMacros: c.customTexMacros? c.customTexMacros: {}
           };
+          tex_node = parseTex(tex, settings.customTexMacros!);
           result = tex2typst(tex, settings);
           if (result !== typst) {
             console.log(`====== 😭 Wrong ======`);
