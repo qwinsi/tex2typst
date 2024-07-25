@@ -1,6 +1,19 @@
 import { symbolMap } from "./map";
 import { TexNode, TexSqrtData, TexSupsubData, TypstNode } from "./types";
 
+
+// symbols that are supported by Typst but not by KaTeX
+const TYPST_INTRINSIC_SYMBOLS = [
+    'dim',
+    'id',
+    'im',
+    'mod',
+    'Pr',
+    'sech',
+    'csch',
+    // 'sgn
+];
+
 export class TypstWriterError extends Error {
     node: TexNode;
 
@@ -12,11 +25,17 @@ export class TypstWriterError extends Error {
 }
 
 export class TypstWriter {
+    private preferTypstIntrinsic: boolean;
+
     protected buffer: string = "";
     protected queue: TypstNode[] = [];
 
     private needSpaceAfterSingleItemScript = false;
     private insideFunctionDepth = 0;
+
+    constructor(preferTypstIntrinsic: boolean) {
+        this.preferTypstIntrinsic = preferTypstIntrinsic;
+    }
 
 
     private writeBuffer(str: string) {
@@ -160,8 +179,6 @@ export class TypstWriter {
                 }
                 // Fall through
             } else if (node.content === '\\operatorname') {
-                this.queue.push({ type: 'symbol', content: 'op' });
-                this.queue.push({ type: 'atom', content: '('});
                 let body = node.args!;
                 if (body.length === 1 && body[0].type == 'ordgroup') {
                     body = body[0].args!;
@@ -172,8 +189,17 @@ export class TypstWriter {
                     buff += convertToken(n.content);
                     return buff;
                 }, "" as string);
-                this.queue.push({ type: 'text', content: text});
-                this.queue.push({ type: 'atom', content: ')'});
+
+                if (this.preferTypstIntrinsic && TYPST_INTRINSIC_SYMBOLS.includes(text)) {
+                    // e.g. we prefer just sech over op("sech")
+                    this.queue.push({ type: 'symbol', content: text});
+                } else {
+                    this.queue.push({ type: 'symbol', content: 'op' });
+                    this.queue.push({ type: 'atom', content: '('});
+                    this.queue.push({ type: 'text', content: text});
+                    this.queue.push({ type: 'atom', content: ')'});
+                }
+
                 return;
             }
             this.queue.push(func_symbol);

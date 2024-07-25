@@ -32,3 +32,7 @@ export interface TypstNode {
     content: string;
     args?: TypstNode[];
 }
+
+export interface Tex2TypstSettings {
+    preferTypstIntrinsic: boolean; // default is false
+}

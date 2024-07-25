@@ -76,3 +76,13 @@ cases:
   - title: left and right floor,ceil
     tex: \lfloor \rfloor \lceil \rceil
     typst: ⌊ ⌋ ⌈ ⌉ 
+  - title: trigonometric functions
+    tex: \sin \cos \tan \cot \sec \csc
+    typst: sin cos tan cot sec csc
+  # - title: hyperbolic functions
+    # tex: \sinh \cosh \tanh \coth \sech \csch
+    # typst: sinh cosh tanh coth sech csch
+  - title: prefer Typst Intrinsic
+    tex: \sech
+    typst: sech
+    preferTypstIntrinsic: true
