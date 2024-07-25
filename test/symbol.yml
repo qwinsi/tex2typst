@@ -83,6 +83,18 @@ cases:
     # tex: \sinh \cosh \tanh \coth \sech \csch
     # typst: sinh cosh tanh coth sech csch
   - title: prefer Typst Intrinsic
+    tex: \operatorname{sech}
+    typst: sech
+    preferTypstIntrinsic: true
+  - title: custom macros
+    tex: \myop y=\sgn(x)
+    typst: op("myop") y = op("sgn")(x)
+    customTexMacros:
+      \myop: \operatorname{myop}
+      \sgn: \operatorname{sgn}
+  - title: custom macros and prefer Typst Intrinsic
     tex: \sech
     typst: sech
     preferTypstIntrinsic: true
+    customTexMacros:
+      \sech: \operatorname{sech}

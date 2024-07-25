@@ -211,9 +211,9 @@ export function katexNodeToTexNode(node: KatexParseNode): TexNode {
     }
 }
 
-export function parseTex(tex: string): TexNode {
+export function parseTex(tex: string, customTexMacros: {[key: string]: string}): TexNode {
     // displayMode=true. Otherwise, "KaTeX parse error: {align*} can be used only in display mode."
-    let treeArray = generateParseTree(tex, {displayMode: true, strict: "ignore"});
+    let treeArray = generateParseTree(tex, {macros: customTexMacros, displayMode: true, strict: "ignore"});
     let t =  {
         type: 'ordgroup',
         mode: 'math',

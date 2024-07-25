@@ -34,5 +34,8 @@ export interface TypstNode {
 }
 
 export interface Tex2TypstSettings {
-    preferTypstIntrinsic: boolean; // default is false
+    preferTypstIntrinsic?: boolean; // default is false,
+    customTexMacros?: { [key: string]: string };
+    // TODO: custom typst functions
+    // TODO: non-strict mode
 }
