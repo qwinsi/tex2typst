@@ -1,16 +1,17 @@
-import { describe, test, expect } from 'vitest';
+import { describe, it, test, expect } from 'vitest';
 import yaml from 'js-yaml';
 import path from 'node:path';
 import fs from 'node:fs';
 import { parseTex, KatexNodeToTexNodeError } from '../src/parser';
 import { tex2typst } from '../src/index';
 import { TypstWriterError } from '../src/writer';
-import { TexNode } from '../src/types';
+import { Tex2TypstSettings, TexNode } from '../src/types';
 
 type TestCase = {
   title: string;
   tex: string;
   typst: string;
+  preferTypstIntrinsic?: boolean; // default is false
 };
 
 type TestCaseFile = {
@@ -34,8 +35,11 @@ caseFiles.forEach(({ title, cases }) => {
         let tex_node: null | TexNode = null;
         let result: null | string = null;
         try {
-          tex_node = parseTex(tex)
-          result = tex2typst(tex);
+          tex_node = parseTex(tex);
+          const settings: Tex2TypstSettings = {
+            preferTypstIntrinsic: c.preferTypstIntrinsic? c.preferTypstIntrinsic: false
+          };
+          result = tex2typst(tex, settings);
           if (result !== typst) {
             console.log(`====== 😭 Wrong ======`);
             console.log(tex);
