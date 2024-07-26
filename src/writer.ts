@@ -25,6 +25,7 @@ export class TypstWriterError extends Error {
 }
 
 export class TypstWriter {
+    private nonStrict: boolean;
     private preferTypstIntrinsic: boolean;
 
     protected buffer: string = "";
@@ -33,7 +34,8 @@ export class TypstWriter {
     private needSpaceAfterSingleItemScript = false;
     private insideFunctionDepth = 0;
 
-    constructor(preferTypstIntrinsic: boolean) {
+    constructor(nonStrict: boolean, preferTypstIntrinsic: boolean) {
+        this.nonStrict = nonStrict;
         this.preferTypstIntrinsic = preferTypstIntrinsic;
     }
 
@@ -246,6 +248,12 @@ export class TypstWriter {
             });
             this.queue.push({ type: 'atom', content: ')'});
             this.insideFunctionDepth --;
+        } else if (node.type === 'unknownMacro') {
+            if (this.nonStrict) {
+                this.queue.push({ type: 'symbol', content: node.content });
+            } else {
+                throw new TypstWriterError(`Unknown macro: ${node.content}`, node);
+            }
         } else {
             throw new TypstWriterError(`Unimplemented node type to append: ${node.type}`, node);
         }
@@ -318,6 +326,7 @@ function convertToken(token: string): string {
         } else {
             // Fall back to the original macro.
             // This works for \{, \}, \alpha, \beta, \gamma, etc.
+            // If this.nonStrict is true, this also works for all unknown macros.
             return symbol;
         }
     }

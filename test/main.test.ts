@@ -5,13 +5,14 @@ import fs from 'node:fs';
 import { parseTex, KatexNodeToTexNodeError } from '../src/parser';
 import { tex2typst } from '../src/index';
 import { TypstWriterError } from '../src/writer';
-import { Tex2TypstSettings, TexNode } from '../src/types';
+import { Tex2TypstOptions, TexNode } from '../src/types';
 
 type TestCase = {
   title: string;
   tex: string;
   typst: string;
-  preferTypstIntrinsic?: boolean; // default is false
+  nonStrict?: boolean;
+  preferTypstIntrinsic?: boolean;
   customTexMacros: { [key: string]: string };
 };
 
@@ -36,9 +37,10 @@ caseFiles.forEach(({ title, cases }) => {
         let tex_node: null | TexNode = null;
         let result: null | string = null;
         try {
-          const settings: Tex2TypstSettings = {
+          const settings: Tex2TypstOptions = {
+            nonStrict: c.nonStrict? c.nonStrict: false,
             preferTypstIntrinsic: c.preferTypstIntrinsic? c.preferTypstIntrinsic: false,
-            customTexMacros: c.customTexMacros? c.customTexMacros: {}
+            customTexMacros: c.customTexMacros? c.customTexMacros: {},
           };
           tex_node = parseTex(tex, settings.customTexMacros!);
           result = tex2typst(tex, settings);

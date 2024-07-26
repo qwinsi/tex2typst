@@ -98,3 +98,7 @@ cases:
     preferTypstIntrinsic: true
     customTexMacros:
       \sech: \operatorname{sech}
+  - title: non-strict mode
+    tex: \myop
+    typst: myop
+    nonStrict: true
