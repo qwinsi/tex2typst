@@ -203,7 +203,6 @@ export function katexNodeToTexNode(node: KatexParseNode): TexNode {
             }
             case 'color':
                 // KaTeX encounters an unrecognized macro.
-                console.log(node.body);
                 if (Array.isArray(node.body) && node.body.length === 1) {
                     const sub_body = node.body[0] as KatexParseNode;
                     if (sub_body.type === 'text') {
