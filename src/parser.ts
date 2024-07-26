@@ -201,6 +201,21 @@ export function katexNodeToTexNode(node: KatexParseNode): TexNode {
                     // Fall through to throw error
                 }
             }
+            case 'color':
+                // KaTeX encounters an unrecognized macro.
+                console.log(node.body);
+                if (Array.isArray(node.body) && node.body.length === 1) {
+                    const sub_body = node.body[0] as KatexParseNode;
+                    if (sub_body.type === 'text') {
+                        res.type = 'unknownMacro';
+                        const joined = (sub_body.body as KatexParseNode[]).map((n) => n.text).join('');
+                        if (/^\\[a-zA-Z]+$/.test(joined)){
+                            res.content = joined.substring(1);
+                            break;
+                        }
+                    }
+                }
+                throw new KatexNodeToTexNodeError(`Unknown error type in parsed result:`, node);
             default:
                 throw new KatexNodeToTexNodeError(`Unknown node type: ${node.type}`, node);
                 break;
@@ -213,7 +228,13 @@ export function katexNodeToTexNode(node: KatexParseNode): TexNode {
 
 export function parseTex(tex: string, customTexMacros: {[key: string]: string}): TexNode {
     // displayMode=true. Otherwise, "KaTeX parse error: {align*} can be used only in display mode."
-    let treeArray = generateParseTree(tex, {macros: customTexMacros, displayMode: true, strict: "ignore"});
+    const options = {
+        macros: customTexMacros,
+        displayMode: true,
+        strict: "ignore",
+        throwOnError: false
+    };
+    let treeArray = generateParseTree(tex, options);
     let t =  {
         type: 'ordgroup',
         mode: 'math',
