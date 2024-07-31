@@ -43,9 +43,6 @@ caseFiles.forEach(({ title, cases }) => {
             customTexMacros: c.customTexMacros? c.customTexMacros: {},
           };
           tex_node = parseTex(tex, settings.customTexMacros!);
-          if (c.title === 'left right {}') {
-            console.log(`====== 😀 Separator ======`);
-          }
           result = tex2typst(tex, settings);
           if (result !== typst) {
             console.log(`====== 😭 Wrong ======`);
