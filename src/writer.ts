@@ -325,7 +325,7 @@ function convertToken(token: string): string {
             return symbolMap.get(symbol)!;
         } else {
             // Fall back to the original macro.
-            // This works for \{, \}, \alpha, \beta, \gamma, etc.
+            // This works for \alpha, \beta, \gamma, etc.
             // If this.nonStrict is true, this also works for all unknown macros.
             return symbol;
         }
