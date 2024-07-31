@@ -27,7 +27,9 @@ export function katexNodeToTexNode(node: KatexParseNode): TexNode {
                 // other punctuation-like macro such as \cdot, \to, \pm
                 res.type = 'atom';
                 res.content = node.text!;
-                if (node.text!.startsWith('\\')) {
+                if (node.text === '\\{' || node.text === '\\}') {
+                    res.content = node.text.substring(1); // '{' or '}'
+                } else if (node.text!.startsWith('\\')) {
                     res.type = 'symbol';
                 }
                 break;
@@ -91,10 +93,18 @@ export function katexNodeToTexNode(node: KatexParseNode): TexNode {
                 });
 
                 res.type = 'leftright';
+                let left: string = node['left']!;
+                if (left === "\\{") {
+                    left = "{";
+                }
+                let right: string = node['right']!;
+                if (right === "\\}") {
+                    right = "}";
+                }
                 res.args = [
-                    { type: 'atom', content: node['left']! },
+                    { type: 'atom', content: left },
                     body,
-                    { type: 'atom', content: node['right']}
+                    { type: 'atom', content: right}
                 ];
                 break;
             }

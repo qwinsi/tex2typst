@@ -46,8 +46,14 @@ cases:
     tex: '\mathbf{m}_\text{ref}'
     typst: 'bold(m)_("ref")'
   - title: left and right brackets
-    tex: '\left[ \mathbf{A} \right)'
-    typst: 'lr([ bold(A)))'
+    tex: '\left[ \mathbf{A} \right) \left\{b \right)'
+    typst: 'lr([ bold(A))) lr({b))'
+  - title: lr
+    tex: \left| a + \frac{1}{3} \right|^2
+    typst: lr(|a + frac(1, 3)|)^2
+  - title: symmetry left right
+    tex: \left\{ a \right\} \left( b \right) \left[ c \right]
+    typst: '{a}(b) [ c ]'
   - title: operatorname
     tex: '\operatorname{diag} \text{diag}'
     typst: 'op("diag") "diag"'
@@ -214,9 +220,6 @@ cases:
   - title: Test7
     tex: (a + b)^2
     typst: (a + b)^2
-  - title: lr
-    tex: \left| a + \frac{1}{3} \right|^2
-    typst: lr(|a + frac(1, 3)|)^2
   - title: leading minus sign
     tex: a^{-s}
     typst: a^(-s)
