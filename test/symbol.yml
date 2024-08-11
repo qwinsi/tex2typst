@@ -9,6 +9,9 @@ cases:
   - title: lowercase Greek letter variants
     tex: \varepsilon \vartheta \varpi \varrho \varsigma \varphi
     typst: epsilon theta.alt pi.alt rho.alt sigma.alt phi
+  - title: Greek letters and their variants that should be handled specially
+    tex: \epsilon \phi
+    typst: epsilon.alt phi.alt
   - title: uppercase Greek alphabet
     tex: \Gamma \Delta \Theta \Lambda \Xi \Pi \Sigma \Upsilon \Phi \Psi \Omega
     typst: Gamma Delta Theta Lambda Xi Pi Sigma Upsilon Phi Psi Omega
@@ -63,7 +66,7 @@ cases:
     typst: sum product union.big sect.big or.big and.big xor.big times.circle.big dot.circle.big union.plus.big union.sq.big
   - title: wave
     tex: \sim \approx \cong \simeq \asymp \equiv \propto
-    typst: tilde.op approx tilde.equiv tilde.eq ≍ equiv prop
+    typst: tilde approx tilde.equiv tilde.eq ≍ equiv prop
   - title: arrows used in proofs
     tex: \implies \iff \leftrightarrow \longleftrightarrow \rightrightarrows
     typst: arrow.r.double.long arrow.l.r.double.long arrow.l.r arrow.l.r.long arrows.rr
