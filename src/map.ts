@@ -14,7 +14,6 @@ export const symbolMap = new Map<string, string>([
     ['ldots', 'dots.h'],
     ['vdots', 'dots.v'],
     ['ddots', 'dots.down'],
-    ['cdots', 'dots.h.c'],
     ['widehat', 'hat'], // Ideally, the result of \widehat should be longer than \hat. But it is not implemented now.
     ['widetilde', 'tilde'], // Ideally, the result of \widetilde should be longer than \tilde. But it is not implemented now.
     ['quad', 'quad'],

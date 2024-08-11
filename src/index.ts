@@ -5,7 +5,7 @@ import { TypstWriter } from "./writer";
 export function tex2typst(tex: string, options?: Tex2TypstOptions): string {
     const opt: Tex2TypstOptions = {
         nonStrict: false,
-        preferTypstIntrinsic: false,
+        preferTypstIntrinsic: true,
         customTexMacros: {}
     };
     if (options) {

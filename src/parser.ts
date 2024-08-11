@@ -136,7 +136,7 @@ export function katexNodeToTexNode(node: KatexParseNode): TexNode {
                 res.type = 'unaryFunc';
                 res.content = ('\\' + node.type!) as string;
                 if (node.type === 'font') {
-                    res.content = '\\' + node['font']; // e.g. \mathbf
+                    res.content = '\\' + node['font']; // e.g. \mathbf, \mathrm
                 }
                 if(Array.isArray(node.body)) {
                     const obj = {
@@ -176,10 +176,7 @@ export function katexNodeToTexNode(node: KatexParseNode): TexNode {
                     });
                 });
                 break;
-            case 'spacing':
-                res.type = 'spacing';
-                res.content = node.text! as string;
-                break;
+
             case 'text': {
                 res.type = 'text';
                 let str = "";
@@ -192,6 +189,10 @@ export function katexNodeToTexNode(node: KatexParseNode): TexNode {
                 res.content = str;
                 break;
             }
+            case 'spacing':
+                // res.type = 'spacing';
+                // res.content = node.text! as string;
+                // break;
             case 'kern':
                 // This can occur for \implies, \iff. 
                 // e.g. \implies is parsed as [{type:'kern'}, {type:'atom', text:'\\Longrightarrow'}, {type:'kern'}]
@@ -200,6 +201,7 @@ export function katexNodeToTexNode(node: KatexParseNode): TexNode {
                 res.type = 'empty';
                 res.content = ' ';
                 break;
+            
             case 'htmlmathml': {
                 // This can occur for \neq.
                 const element = (node['mathml'] as KatexParseNode[])[0]!['body']![0];
@@ -237,8 +239,24 @@ export function katexNodeToTexNode(node: KatexParseNode): TexNode {
 
 export function parseTex(tex: string, customTexMacros: {[key: string]: string}): TexNode {
     // displayMode=true. Otherwise, "KaTeX parse error: {align*} can be used only in display mode."
+    const macros = {
+        // KaTeX parse these commands so complicatedly that we need some hacks to keep things simple.
+        '\\mod': '\\operatorname{SyMb01-mod}',
+        '\\liminf': '\\operatorname{SyMb01-liminf}',
+        '\\limsup': '\\operatorname{SyMb01-limsup}',
+        '\\qquad': '\\operatorname{SyMb01-qquad}',
+        '\\quad': '\\operatorname{SyMb01-quad}',
+        '\\cdots': '\\operatorname{SyMb01-cdots}',
+        '\\colon': '\\operatorname{SyMb01-colon}',
+        '\\imath': '\\operatorname{SyMb01-imath}',
+        '\\\iiiint': '\\operatorname{SyMb01-iiiint}', // \iiint is valid in LaTeX but not supported in KaTeX
+        '\\jmath': '\\operatorname{SyMb01-jmath}',
+        '\\vdots': '\\operatorname{SyMb01-vdots}',
+        '\\notin': '\\operatorname{SyMb01-notin}',
+        ...customTexMacros
+    };
     const options = {
-        macros: customTexMacros,
+        macros: macros,
         displayMode: true,
         strict: "ignore",
         throwOnError: false

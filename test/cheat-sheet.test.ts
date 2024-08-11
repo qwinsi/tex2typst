@@ -12,32 +12,36 @@ interface CheatSheet {
 describe('cheat sheet', () => {
     const cheatSheetFile = path.join(__dirname, 'cheat-sheet.toml');
     const text_content = fs.readFileSync(cheatSheetFile, { encoding: 'utf-8' });
-    const data = toml.parse(text_content);
+    const data = toml.parse(text_content) as CheatSheet;
 
     expect(data.math_symbols).toBeDefined();
 
-    it('math_commands', () => {
+    describe('math_commands', () => {
         expect(data.math_commands).toBeDefined();
 
 
         for (const [key, value] of Object.entries(data.math_commands)) {
-            const input = `\\${key}{x}{y}`;
-            const expected1 = `${value} x y`;
-            const expected2 = `${value}(x) y`;
-            const expected3 = `${value}(x, y)`;
-            const result = tex2typst(input);
-            expect([expected1, expected2, expected3]).toContain(result);
+            test(key, function () {
+                const input = `\\${key}{x}{y}`;
+                const expected1 = `${value} x y`;
+                const expected2 = `${value}(x) y`;
+                const expected3 = `${value}(x, y)`;
+                const result = tex2typst(input);
+                expect([expected1, expected2, expected3]).toContain(result);
+            });
         }
     });
 
-    it('math_symbols', () => {
+    describe('math_symbols', () => {
         expect(data.math_symbols).toBeDefined();
 
         for (const [key, value] of Object.entries(data.math_symbols)) {
-            const input = `\\${key}`;
-            const expected = value;
-            const result = tex2typst(input);
-            expect(result).toBe(expected);
+            test(key, function() {
+                const input = `\\${key}`;
+                const expected = value;
+                const result = tex2typst(input);
+                expect(result).toBe(expected);
+            });
         }
     });
 });

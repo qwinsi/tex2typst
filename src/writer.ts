@@ -195,6 +195,9 @@ export class TypstWriter {
                 if (this.preferTypstIntrinsic && TYPST_INTRINSIC_SYMBOLS.includes(text)) {
                     // e.g. we prefer just sech over op("sech")
                     this.queue.push({ type: 'symbol', content: text});
+                } else if (text.startsWith('SyMb01-')) {
+                    // special hacks made in parseTex()
+                    this.queue.push({ type: 'symbol', content: '\\' + text.substring(7)});
                 } else {
                     this.queue.push({ type: 'symbol', content: 'op' });
                     this.queue.push({ type: 'atom', content: '('});
