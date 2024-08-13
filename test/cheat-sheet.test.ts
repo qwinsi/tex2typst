@@ -16,32 +16,28 @@ describe('cheat sheet', () => {
 
     expect(data.math_symbols).toBeDefined();
 
-    describe('math_commands', () => {
+    test('math_commands', () => {
         expect(data.math_commands).toBeDefined();
 
 
         for (const [key, value] of Object.entries(data.math_commands)) {
-            test(key, function () {
-                const input = `\\${key}{x}{y}`;
-                const expected1 = `${value} x y`;
-                const expected2 = `${value}(x) y`;
-                const expected3 = `${value}(x, y)`;
-                const result = tex2typst(input);
-                expect([expected1, expected2, expected3]).toContain(result);
-            });
+            const input = `\\${key}{x}{y}`;
+            const expected1 = `${value} x y`;
+            const expected2 = `${value}(x) y`;
+            const expected3 = `${value}(x, y)`;
+            const result = tex2typst(input);
+            expect([expected1, expected2, expected3]).toContain(result);
         }
     });
 
-    describe('math_symbols', () => {
+    test('math_symbols', () => {
         expect(data.math_symbols).toBeDefined();
 
         for (const [key, value] of Object.entries(data.math_symbols)) {
-            test(key, function() {
-                const input = `\\${key}`;
-                const expected = value;
-                const result = tex2typst(input);
-                expect(result).toBe(expected);
-            });
+            const input = `\\${key}`;
+            const expected = value;
+            const result = tex2typst(input);
+            expect(result).toBe(expected);
         }
     });
 });

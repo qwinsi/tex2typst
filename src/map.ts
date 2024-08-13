@@ -1,6 +1,5 @@
 export const symbolMap = new Map<string, string>([
     ['gets', 'arrow.l'],
-    ['infty', 'infinity'], // infinity
     ['nonumber', ''],
     ['vec', 'arrow'],
     ['mathbf', 'bold'],
@@ -46,40 +45,6 @@ export const symbolMap = new Map<string, string>([
     ['otimes', 'times.circle'],
     ['boxtimes', 'times.square'],
 
-    /* symbols in mathematical logic */
-    ['neg', 'not'],
-    ['land', 'and'],
-    ['lor', 'or'],
-
-    ['varnothing', 'diameter'], // empty set
-
-    /* symbols about comparing numbers */
-    // tex: \neq \leq \geq \ll \gg \prec \succ \preceq \succeq
-    // typst: eq.not lt.eq gt.eq lt.double gt.double prec succ prec.eq succ.eq
-    ['neq', 'eq.not'],
-    ['leq', 'lt.eq'],
-    ['geq', 'gt.eq'],
-    ['ll', 'lt.double'],
-    ['gg', 'gt.double'],
-    ['prec', 'prec'],
-    ['succ', 'succ'],
-    ['preceq', 'prec.eq'],
-    ['succeq', 'succ.eq'],
-
-    /* symbols about differential */
-    ['Delta', 'Delta'],
-    ['nabla', 'nabla'],
-    ['partial', 'diff'],
-
-    /* symbols about integral */
-    // tex: \int \oint \iint \oiint \iiint \oiiint
-    // typst: integral integral.cont integral.double integral.surf integral.triple integral.vol
-    ['int', 'integral'],
-    ['oint', 'integral.cont'],
-    ['iint', 'integral.double'],
-    ['oiint', 'integral.surf'],
-    ['iiint', 'integral.triple'],
-    ['oiiint', 'integral.vol'],
 
     /* wave */
     // tex: \sim \approx \cong \simeq \asymp \equiv \propto
@@ -103,7 +68,6 @@ export const symbolMap = new Map<string, string>([
     ['longleftrightarrow', 'arrow.l.r.long'],
     ['rightrightarrows', 'arrows.rr'],
 
-    ['binom', 'binom'],
 
     /* left and right floor,ceil */
     // tex: \lfloor \rfloor \lceil \rceil
@@ -193,12 +157,14 @@ export const symbolMap = new Map<string, string>([
     ['iiint', 'integral.triple'], 
     ['iint', 'integral.double'], 
     ['in', 'in'], 
+    ['infty', 'infinity'],
     ['int', 'integral'], 
     ['intercal', 'top'],  // 'top' or 'tack.b'
     ['iota', 'iota'], 
     ['jmath', 'dotless.j'], 
     ['kappa', 'kappa'], 
     ['lambda', 'lambda'], 
+    ['land', 'and'],
     ['langle', 'angle.l'], 
     ['lbrace', 'brace.l'], 
     ['lbrack', 'bracket.l'], 
@@ -214,6 +180,7 @@ export const symbolMap = new Map<string, string>([
     ['ll', 'lt.double'], 
     ['longmapsto', 'arrow.long.bar'], 
     ['longrightarrow', 'arrow.long'], 
+    ['lor', 'or'],
     ['ltimes', 'times.l'], 
     ['mapsto', 'arrow.bar'], 
     ['measuredangle', 'angle.arc'], 
@@ -227,14 +194,25 @@ export const symbolMap = new Map<string, string>([
     ['ne', 'eq.not'], 
     ['neg', 'not'], 
     ['neq', 'eq.not'], 
+    ['nexists', 'exists.not'],
+    ['ni', "in.rev"],
+    ['nleftarrow', "arrow.l.not"],
+    ['nleq', "lt.eq.not"],
+    ['nparallel', "parallel.not"],
+    ['ngeq', 'gt.eq.not'],
     ['nmid', 'divides.not'], 
     ['notin', 'in.not'], 
-    ['nleftarrow', 'arrow.l.not'], 
     ['nrightarrow', 'arrow.not'], 
     ['nsim', 'tilde.not'], 
+    ['nsubseteq', 'subset.eq.not'],
     ['nu', 'nu'], 
+    ['ntriangleleft', 'lt.tri.not'],
+    ['ntriangleright', 'gt.tri.not'],
+    ['nwarrow', 'arrow.tl'],
     ['odot', 'dot.circle'], 
     ['oint', 'integral.cont'], 
+    ['oiint', 'integral.surf'],
+    ['oiiint', 'integral.vol'],
     ['omega', 'omega'], 
     // ['omicron', 'omicron'], 
     ['ominus', 'minus.circle'], 
@@ -264,9 +242,14 @@ export const symbolMap = new Map<string, string>([
     ['sigma', 'sigma'], 
     ['sim', 'tilde'], 
     ['simeq', 'tilde.eq'], 
+    ['slash', 'slash'], 
+    ['smallsetminus', 'without'], 
     // ['smile', 'paren.b'], 
+    ['spadesuit', 'suit.spade'],
     ['sqcap', 'sect.sq'], 
     ['sqcup', 'union.sq'], 
+    ['sqsubseteq', 'subset.eq.sq'],
+    ['sqsupseteq', 'supset.eq.sq'],
     ['star', 'star'], 
     ['subset', 'subset'], 
     ['subseteq', 'subset.eq'], 
@@ -277,19 +260,24 @@ export const symbolMap = new Map<string, string>([
     ['supset', 'supset'], 
     ['supseteq', 'supset.eq'], 
     ['supsetneq', 'supset.neq'], 
+    ['swarrow', 'arrow.bl'], 
     ['tau', 'tau'], 
     ['theta', 'theta'], 
     ['times', 'times'], 
     ['to', 'arrow.r'], 
+    ['top', 'top'], 
     ['triangle', 'triangle.t'], 
+    ['triangledown', 'triangle.b.small'], 
     ['triangleleft', 'triangle.l.small'], 
-    ['triangleright', 'triangle.small'], 
+    ['triangleright', 'triangle.r.small'], 
+    ['twoheadrightarrow', 'arrow.r.twohead'], 
     ['uparrow', 'arrow.t'], 
     ['updownarrow', 'arrow.t.b'], 
     ['upharpoonright', 'harpoon.tr'], 
     ['uplus', 'union.plus'], 
     ['upsilon', 'upsilon'], 
     ['varepsilon', 'epsilon'], 
+    ['varnothing', 'diameter'], // empty set
     ['varphi', 'phi'], 
     ['varpi', 'pi.alt'], 
     ['varrho', 'rho.alt'], 
