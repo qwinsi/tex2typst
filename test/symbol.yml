@@ -73,6 +73,9 @@ cases:
   # - title: def eq
   #   tex: \overset{\text{def}}{=}
   #   typst: eq.def
+  - title: monetary symbols
+    tex: \$ \pounds \yen
+    typst: \$ pound yen
   - title: combinatorial number
     tex: \binom{n}{k}
     typst: binom(n, k)

@@ -322,6 +322,8 @@ function convertToken(token: string): string {
         return token;
     } else if (token === '\\\\') {
         return '\\\n';
+    } else if (token === '\\$') {
+        return token;
     } else if (token.startsWith('\\')) {
         const symbol = token.slice(1);
         if (symbolMap.has(symbol)) {

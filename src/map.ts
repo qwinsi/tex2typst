@@ -224,6 +224,7 @@ export const symbolMap = new Map<string, string>([
     ['phi', 'phi.alt'], 
     ['pi', 'pi'], 
     ['pm', 'plus.minus'], 
+    ['pounds', 'pound'], 
     ['prec', 'prec'], 
     ['preceq', 'prec.eq'], 
     ['prime', 'prime'], 
@@ -289,5 +290,6 @@ export const symbolMap = new Map<string, string>([
     ['wedge', 'and'], 
     ['wr', 'wreath'], 
     ['xi', 'xi'], 
+    ['yen', 'yen'], 
     ['zeta', 'zeta'], 
 ]);
