@@ -322,7 +322,7 @@ function convertToken(token: string): string {
         return token;
     } else if (token === '\\\\') {
         return '\\\n';
-    } else if (token === '\\$') {
+    } else if (['\\$', '\\#', '\\&', '\\_'].includes(token)) {
         return token;
     } else if (token.startsWith('\\')) {
         const symbol = token.slice(1);

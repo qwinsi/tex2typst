@@ -76,6 +76,9 @@ cases:
   - title: monetary symbols
     tex: \$ \pounds \yen
     typst: \$ pound yen
+  - title: escape characters
+    tex: \{ \} \_ \& \# \% \$
+    typst: "{} \\_\\& \\# % \\$" # Ideally there should be a space between \ and {, but not implemented yet
   - title: combinatorial number
     tex: \binom{n}{k}
     typst: binom(n, k)
