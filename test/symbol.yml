@@ -78,9 +78,15 @@ cases:
   - title: combinatorial number
     tex: \binom{n}{k}
     typst: binom(n, k)
-  - title: left and right floor,ceil
-    tex: \lfloor \rfloor \lceil \rceil
-    typst: ⌊ ⌋ ⌈ ⌉ 
+  - title: unpaired left and right floor, ceil 1
+    tex: \lfloor \rceil
+    typst: ⌊ ⌉ 
+  - title: unpaired left and right floor,ceil 2
+    tex: \rfloor \lceil
+    typst: ⌋ ⌈
+  - title: paired left and right floor,ceil
+    tex: \lfloor x \rfloor \lceil x \rceil
+    typst: floor(x) ceil(x)
   - title: trigonometric functions
     tex: \sin \cos \tan \cot \sec \csc
     typst: sin cos tan cot sec csc
