@@ -292,4 +292,9 @@ export const symbolMap = new Map<string, string>([
     ['xi', 'xi'], 
     ['yen', 'yen'], 
     ['zeta', 'zeta'], 
+
+    // extended
+    ['mathscr', 'scr'],
+    ['LaTeX', '#LaTeX'],
+    ['TeX', '#TeX'],
 ]);

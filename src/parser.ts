@@ -254,6 +254,8 @@ export function parseTex(tex: string, customTexMacros: {[key: string]: string}):
         '\\vdots': '\\operatorname{SyMb01-vdots}',
         '\\notin': '\\operatorname{SyMb01-notin}',
         '\\slash': '\\operatorname{SyMb01-slash}',
+        '\\LaTeX': '\\operatorname{SyMb01-LaTeX}',
+        '\\TeX': '\\operatorname{SyMb01-TeX}',
         ...customTexMacros
     };
     const options = {
