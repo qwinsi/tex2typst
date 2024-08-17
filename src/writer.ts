@@ -132,7 +132,7 @@ export class TypstWriter {
         } else if (node.type === 'leftright') {
             const [left, body, right] = node.args!;
             // These pairs will be handled by Typst compiler by default. No need to add lr()
-            if (["[]", "()", "{}"].includes(left.content + right.content)) {
+            if (["[]", "()", "{}", "\\lfloor\\rfloor", "\\lceil\\rceil"].includes(left.content + right.content)) {
                 this.append(left);
                 this.append(body);
                 this.append(right);

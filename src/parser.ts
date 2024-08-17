@@ -101,10 +101,11 @@ export function katexNodeToTexNode(node: KatexParseNode): TexNode {
                 if (right === "\\}") {
                     right = "}";
                 }
+                const is_atom = (str:string) => (['(', ')', '[', ']', '{', '}'].includes(str));
                 res.args = [
-                    { type: 'atom', content: left },
+                    { type: is_atom(left)? 'atom': 'symbol', content: left },
                     body,
-                    { type: 'atom', content: right}
+                    { type: is_atom(right)? 'atom': 'symbol', content: right}
                 ];
                 break;
             }
