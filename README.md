@@ -7,23 +7,38 @@ A Web UI wrapper is available at [https://qwinsi.github.io/tex2typst-webapp/](ht
 
 ## Installation
 
+## Installing it in a Node.js project
+
 ```bash
 npm install tex2typst
 ```
+
+## Or just loading it in a web page
+
+```html
+<script type="module" src="https://cdn.jsdelivr.net/npm/tex2typst@0.0.18/dist/tex2typst.min.js"></script>
+<!-- or  -->
+<script type="module" src="https://unpkg.com/tex2typst@0.0.18/dist/tex2typst.min.js"></script>
+```
+
+Replace `0.0.18` with the latest version number in case this README is outdated.
 
 ## Usage
 
 ### Basic usage
 
 ```javascript
-import { parseTex, tex2typst } from 'tex2typst';
+import { tex2typst } from 'tex2typst';
 
 let output = tex2typst("\\zeta(s) = \\sum_{n=1}^{\\infty}\\frac{1}{n^s}");
 console.log(output);
 // zeta(s) = sum_(n = 1)^infinity frac(1, n^s)
 ```
 
-### Advanced settings
+If you are using the library in a web page via a `<script>` tag, you don't need the line of `import`, a global variable `tex2typst` should be available.
+
+
+### Advanced options
 
 - custom TeX macros/commands
 
@@ -33,7 +48,7 @@ let macros = {
     "\\sgn": "\\operatorname{sgn}"
 };
 let input = "y = \\sgn(x)";
-const output = tex2typst(input, {customTexMacros: macros});
+let output = tex2typst(input, {customTexMacros: macros});
 console.log(output);
 // y = op("sgn")(x)
 ```
