@@ -1,6 +1,6 @@
 // @ts-ignore
 import katex from 'katex';
-import { TexNode, KatexParseNode, TexSupsubData } from './types.js';
+import { TexNode, KatexParseNode, TexSupsubData } from './types';
 
 
 const generateParseTree = katex.__parse;

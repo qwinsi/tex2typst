@@ -2,6 +2,7 @@ import { parseTex } from "./parser";
 import { Tex2TypstOptions } from "./types";
 import { TypstWriter } from "./writer";
 
+
 export function tex2typst(tex: string, options?: Tex2TypstOptions): string {
     const opt: Tex2TypstOptions = {
         nonStrict: false,
@@ -24,3 +25,10 @@ export function tex2typst(tex: string, options?: Tex2TypstOptions): string {
     writer.append(t);
     return writer.finalize();
 }
+
+
+if(typeof window !== 'undefined') {
+    (window as any).tex2typst = tex2typst;
+}
+
+export { Tex2TypstOptions };
