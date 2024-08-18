@@ -25,11 +25,6 @@ export const symbolMap = new Map<string, string>([
 
     ['mathbb', 'bb'],
     ['mathcal', 'cal'],
-    // TODO: This result it not proper. A solution is define scr in Typst code:
-    // #let scr(a) = text(font: "STIX Two Math", stylistic-set: 01)[#math.cal(a)]
-    // https://qiita.com/Yarakashi_Kikohshi/items/b7beaa0fba62a527df2b
-    // https://github.com/typst/typst/issues/1431
-    ['mathscr', 'cal'],
 
     ['mathrm', 'upright'],
     ['rm', 'upright'],
