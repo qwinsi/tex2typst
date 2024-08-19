@@ -16,12 +16,12 @@ npm install tex2typst
 ## Or just loading it in a web page
 
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/tex2typst@0.0.18/dist/tex2typst.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tex2typst@0.0.19/dist/tex2typst.min.js"></script>
 <!-- or  -->
-<script type="module" src="https://unpkg.com/tex2typst@0.0.18/dist/tex2typst.min.js"></script>
+<script src="https://unpkg.com/tex2typst@0.0.19/dist/tex2typst.min.js"></script>
 ```
 
-Replace `0.0.18` with the latest version number in case this README is outdated.
+Replace `0.0.19` with the latest version number in case this README is outdated.
 
 ## Usage
 
@@ -35,7 +35,7 @@ console.log(output);
 // zeta(s) = sum_(n = 1)^infinity frac(1, n^s)
 ```
 
-If you are using the library in a web page via a `<script>` tag, you don't need the line of `import`, a global variable `tex2typst` should be available.
+If you are using the library in a web page via a `<script>` tag, you don't need the line of `import`, function `tex2typst` should be available in the global scope.
 
 
 ### Advanced options

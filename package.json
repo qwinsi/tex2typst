@@ -1,6 +1,6 @@
 {
   "name": "tex2typst",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "description": "JavaScript library for converting TeX code to Typst",
   "type": "module",
   "main": "dist/index.js",
@@ -16,7 +16,7 @@
   "scripts": {
     "prebuild": "rimraf dist/",
     "build:node": "bun build --entrypoints src/index.ts  --outdir ./dist  --target node --external katex",
-    "build:browser": "bun build --entrypoints src/index.ts --outdir ./dist --target browser --entry-naming [dir]/tex2typst.min.[ext] --minify",
+    "build:browser": "bun build --entrypoints src/tex2typst.ts --outdir ./dist --target browser --entry-naming [dir]/[name].min.[ext] --minify",
     "build:types": "tsc --project ./tsconfig.json",
     "build": "npm run build:node && npm run build:browser && npm run build:types",
     "test": "vitest run"

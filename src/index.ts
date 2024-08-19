@@ -26,9 +26,4 @@ export function tex2typst(tex: string, options?: Tex2TypstOptions): string {
     return writer.finalize();
 }
 
-
-if(typeof window !== 'undefined') {
-    (window as any).tex2typst = tex2typst;
-}
-
 export { Tex2TypstOptions };
