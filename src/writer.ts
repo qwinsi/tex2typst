@@ -55,6 +55,8 @@ export class TypstWriter {
             no_need_space ||= /[0-9]$/.test(this.buffer) && /^[0-9]/.test(str);
             // leading sign
             no_need_space ||= /[\(\[{]\s*(-|\+)$/.test(this.buffer) || this.buffer === "-" || this.buffer === "+";
+            // new line
+            no_need_space ||= str.startsWith('\n');
             // buffer is empty
             no_need_space ||= this.buffer === "";
             // other cases
@@ -210,7 +212,12 @@ export class TypstWriter {
                     this.queue.push({ type: 'symbol', content: text});
                 } else if (text.startsWith('SyMb01-')) {
                     // special hacks made in parseTex()
-                    this.queue.push({ type: 'symbol', content: '\\' + text.substring(7)});
+                    const special_symbol = text.substring(7);
+                    if (special_symbol === 'newline') {
+                        this.queue.push({ type: 'newline', content: '\n'});
+                        return;
+                    }
+                    this.queue.push({ type: 'symbol', content: '\\' + special_symbol});
                 } else {
                     this.queue.push({ type: 'symbol', content: 'op' });
                     this.queue.push({ type: 'atom', content: '('});
@@ -249,8 +256,12 @@ export class TypstWriter {
                 row.forEach((cell, j) => {
                     // There is a leading & in row
                     if (cell.type === 'ordgroup' && cell.args!.length === 0) {
+                        this.queue.push({ type: 'atom', content: ',' });
                         return;
                     }
+                    // if (j == 0 && cell.type === 'newline' && cell.content === '\n') {
+                        // return;
+                    // }
                     this.append(cell);
                     // cell.args!.forEach((n) => this.append(n));
                     if (j < row.length - 1) {
@@ -270,6 +281,8 @@ export class TypstWriter {
             } else {
                 throw new TypstWriterError(`Unknown macro: ${node.content}`, node);
             }
+        } else if (node.type === 'comment') {
+            this.queue.push({ type: 'comment', content: node.content });
         } else {
             throw new TypstWriterError(`Unimplemented node type to append: ${node.type}`, node);
         }
@@ -291,6 +304,12 @@ export class TypstWriter {
                 case 'softSpace':
                     this.needSpaceAfterSingleItemScript = true;
                     str = '';
+                    break;
+                case 'comment':
+                    str = `//${node.content}`;
+                    break;
+                case 'newline':
+                    str = '\n';
                     break;
                 default:
                     throw new TypstWriterError(`Unexpected node type to stringify: ${node.type}`, node)
@@ -350,7 +369,7 @@ function convertToken(token: string): string {
     if (/^[a-zA-Z0-9]$/.test(token)) {
         return token;
     } else if (token === '\\\\') {
-        return '\\\n';
+        return '\\';
     } else if (token == '/') {
         return '\\/';
     } else if (['\\$', '\\#', '\\&', '\\_'].includes(token)) {

@@ -228,6 +228,10 @@ export function katexNodeToTexNode(node: KatexParseNode): TexNode {
                     }
                 }
                 throw new KatexNodeToTexNodeError(`Unknown error type in parsed result:`, node);
+            case 'comment':
+                res.type = 'comment';
+                res.content = node.text!;
+                break;
             default:
                 throw new KatexNodeToTexNodeError(`Unknown node type: ${node.type}`, node);
                 break;
@@ -236,6 +240,61 @@ export function katexNodeToTexNode(node: KatexParseNode): TexNode {
     } catch (e) {
         throw e;
     }
+}
+
+// Split tex into a list of tex strings and comments.
+// Each item in the returned list is either a tex snippet or a comment.
+// Each comment item is a string starting with '%'.
+function splitTex(tex: string): string[] {
+    const lines = tex.split("\n");
+    const out_tex_list: string[] = [];
+    let current_tex = "";
+    // let inside_begin_depth = 0;
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        // if (line.includes('\\begin{')) {
+            // inside_begin_depth += line.split('\\begin{').length - 1;
+        // }
+
+        let index = -1;
+        while (index + 1 < line.length) {
+            index = line.indexOf('%', index + 1);
+            if (index === -1) {
+                // No comment in this line
+                break;
+            }
+            if (index === 0 || line[index - 1] !== '\\') {
+                // Found a comment
+                break;
+            }
+        }
+        if (index !== -1) {
+            current_tex += line.substring(0, index);
+            const comment = line.substring(index);
+            out_tex_list.push(current_tex);
+            current_tex = "";
+            out_tex_list.push(comment);
+        } else {
+            current_tex += line;
+        }
+        if (i < lines.length - 1) {
+            const has_begin_command = line.includes('\\begin{');
+            const followed_by_end_command = lines[i + 1].includes('\\end{');
+            if(!has_begin_command && !followed_by_end_command) {
+                current_tex += "\\SyMbOlNeWlInE ";
+            }
+        }
+
+        // if (line.includes('\\end{')) {
+            // inside_begin_depth -= line.split('\\end{').length - 1;
+        // }
+    }
+
+    if (current_tex.length > 0) {
+        out_tex_list.push(current_tex);
+    }
+
+    return out_tex_list;
 }
 
 export function parseTex(tex: string, customTexMacros: {[key: string]: string}): TexNode {
@@ -257,6 +316,7 @@ export function parseTex(tex: string, customTexMacros: {[key: string]: string}):
         '\\slash': '\\operatorname{SyMb01-slash}',
         '\\LaTeX': '\\operatorname{SyMb01-LaTeX}',
         '\\TeX': '\\operatorname{SyMb01-TeX}',
+        '\\SyMbOlNeWlInE': '\\operatorname{SyMb01-newline}',
         ...customTexMacros
     };
     const options = {
@@ -265,7 +325,25 @@ export function parseTex(tex: string, customTexMacros: {[key: string]: string}):
         strict: "ignore",
         throwOnError: false
     };
-    let treeArray = generateParseTree(tex, options);
+
+    const tex_list = splitTex(tex);
+
+    let treeArray: KatexParseNode[] = [];
+
+    for (const tex_item of tex_list) {
+        if (tex_item.startsWith('%')) {
+            const tex_node: KatexParseNode = {
+                type: 'comment',
+                mode: 'math',
+                text: tex_item.substring(1),
+            };
+            treeArray.push(tex_node);
+            continue;
+        }
+        const trees = generateParseTree(tex_item, options);
+        treeArray = treeArray.concat(trees);
+    }
+
     let t =  {
         type: 'ordgroup',
         mode: 'math',

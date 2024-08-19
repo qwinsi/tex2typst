@@ -69,7 +69,8 @@ cases:
       \\
       \boldsymbol{G}_{z}
     typst: |-
-      bold(D) \
+      bold(D)
+      \
       bold(G)_z
   - title: Complex equations with nested over/under braces
     tex: |-
@@ -110,8 +111,40 @@ cases:
       }_{\boldsymbol{B}(\psi^{n+1})}&
       \end{align*}
     typst: |-
-      overbrace([ frac(1, Delta t) frac(diff bold(theta)^(n + 1), diff bold(psi)^(n + 1)) - bold(D) "diag"(bold(G) bold(psi)^(n + 1)) frac(diff bold(k)_(A v), diff bold(psi)^(n + 1)) - bold(D) "diag"(bold(k)_(A v)(bold(psi)^(n + 1) comma bold(m))) bold(G) - bold(G)_z frac(diff bold(k)_(A v), diff bold(psi)^(n + 1)) ], bold(A)_0 (bold(psi)^(n + 1))) frac(diff bold(psi)^(n + 1), diff bold(m)) \
-      + underbrace([ -frac(1, Delta t) frac(diff bold(theta)^n, diff bold(psi)^n) ], bold(A)_(-1)(bold(psi)^n)) frac(diff bold(psi)^n, diff bold(m)) = underbrace([ -bold(D) "diag"(bold(G) bold(psi)^(n + 1)) frac(diff bold(k)_(A v), diff bold(m)) - bold(G)_z frac(diff bold(k)_(A v), diff bold(m)) ], bold(B)(psi^(n + 1))) &
+      overbrace(
+      [
+      frac(1, Delta t)
+      frac(diff bold(theta)^(n + 1), diff bold(psi)^(n + 1))
+      - bold(D)
+      "diag"(bold(G) bold(psi)^(n + 1))
+      frac(diff bold(k)_(A v), diff bold(psi)^(n + 1))
+      - bold(D)
+      "diag"(bold(k)_(A v)(bold(psi)^(n + 1) comma bold(m)))
+      bold(G)
+      - bold(G)_z
+      frac(diff bold(k)_(A v), diff bold(psi)^(n + 1))
+      ]
+      , bold(A)_0 (bold(psi)^(n + 1)))
+      frac(diff bold(psi)^(n + 1), diff bold(m))
+      \
+      +
+      underbrace(
+      [
+      -frac(1, Delta t)
+      frac(diff bold(theta)^n, diff bold(psi)^n)
+      ]
+      , bold(A)_(-1)(bold(psi)^n))
+      frac(diff bold(psi)^n, diff bold(m))
+      =
+      underbrace(
+      [
+      -bold(D)
+      "diag"(bold(G) bold(psi)^(n + 1))
+      frac(diff bold(k)_(A v), diff bold(m))
+      - bold(G)_z
+      frac(diff bold(k)_(A v), diff bold(m))
+      ]
+      , bold(B)(psi^(n + 1))) &
   - title: leading underscore
     tex: _2
     typst: '""_2'
@@ -184,21 +217,27 @@ cases:
       a &= b \\
       c &= d
       \end{matrix}
-    typst: 'm = mat(delim: #none, a, = b; c, = d)'
+    typst: |-
+      m = mat(delim: #none, a, = b;
+      c, = d)
   - title: Matrix2
     tex: |-
       \begin{matrix}
       &a &= b \\
       &c &= d
       \end{matrix}
-    typst: 'mat(delim: #none, a, = b; c, = d)'
+    typst: |-
+      mat(delim: #none, , a, = b;
+      , c, = d)
   - title: Array
     tex: |-
       \begin{array}{cc}
       a & b \\
       c & d
       \end{array}
-    typst: 'mat(delim: #none, a, b; c, d)'
+    typst: |-
+      mat(delim: #none, a, b;
+      c, d)
   - title: Test3
     tex: \boldsymbol{x}
     typst: bold(x)
@@ -238,3 +277,20 @@ cases:
   - title: underline, overline
     tex: \underline{a} \overline{a} \underline{a + 1} \overline{a + 1}
     typst: underline(a) overline(a) underline(a + 1) overline(a + 1)
+  - title: comment
+    tex: a + b % comment
+    typst: a + b // comment
+  - title: comment2
+    tex: a + b % comment % comment2
+    typst: a + b // comment % comment2
+  - title: comment3
+    tex: |-
+      a + b % co
+      c + d
+      e + f % co
+      g + h
+    typst: |-
+      a + b // co
+      c + d
+      e + f // co
+      g + h
