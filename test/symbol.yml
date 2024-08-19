@@ -116,3 +116,6 @@ cases:
   - title: extended
     tex: \mathscr{A} \LaTeX \TeX
     typst: "scr(A) #LaTeX #TeX"
+  - title: mathbf
+    tex: \mathbf{A}
+    typst: upright(bold(A))

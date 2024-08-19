@@ -2,9 +2,6 @@ export const symbolMap = new Map<string, string>([
     ['gets', 'arrow.l'],
     ['nonumber', ''],
     ['vec', 'arrow'],
-    ['mathbf', 'bold'],
-    ['boldsymbol', 'bold'],
-    ['mathfrak', 'frak'],
     ['neq', 'eq.not'],
     ['dot', 'dot'],
     ['ddot', 'dot.double'],
@@ -23,8 +20,13 @@ export const symbolMap = new Map<string, string>([
     ['underline', 'underline'], // same
     ['bar', 'macron'],
 
+    ['boldsymbol', 'bold'],
+    ['mathbf', 'bold'],
     ['mathbb', 'bb'],
     ['mathcal', 'cal'],
+    ['mathfrak', 'frak'],
+    ['mathsf', 'sans'],
+    ['mathtt', 'mono'],
 
     ['mathrm', 'upright'],
     ['rm', 'upright'],

@@ -172,6 +172,19 @@ export class TypstWriter {
                 this.queue.push({ type: 'atom', content: ')'});
                 this.insideFunctionDepth --;
                 return;
+            } else if (node.content === '\\mathbf') {
+                this.append({ type: 'symbol', content: 'upright' });
+                this.insideFunctionDepth ++;
+                this.queue.push({ type: 'atom', content: '('});
+                this.queue.push(func_symbol);
+                this.insideFunctionDepth ++;
+                this.queue.push({ type: 'atom', content: '('});
+                this.append(arg0);
+                this.queue.push({ type: 'atom', content: ')'});
+                this.insideFunctionDepth --;
+                this.queue.push({ type: 'atom', content: ')'});
+                this.insideFunctionDepth --;
+                return;
             } else if (node.content === '\\mathbb') {
                 const body = node.args![0];
                 if (body.type === 'symbol' && /^[A-Z]$/.test(body.content)) {

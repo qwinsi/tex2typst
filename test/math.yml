@@ -5,7 +5,7 @@ cases:
     tex: '\nabla \cdot \vec{j}(p) = \lim_{v \to \{ p \}} = \int \int_{S(v)} \frac{\vec{j} \cdot \vec{n}}{v} dS'
     typst: nabla dot.op arrow(j)(p) = lim_(v arrow.r {p}) = integral integral_(S(v)) frac(arrow(j) dot.op arrow(n), v) d S
   - title: Fractions and vectors
-    tex: '\frac{1}{4} \sum_{i=1}^4 \mathbf{P}_i^\top \sqrt{v} \mathbf{\Sigma}^{-1} \sqrt{v} \mathbf{P}_i \mathbf{j} = \mathbf{D}^\top v \phi'
+    tex: '\frac{1}{4} \sum_{i=1}^4 \boldsymbol{P}_i^\top \sqrt{v} \boldsymbol{\Sigma}^{-1} \sqrt{v} \boldsymbol{P}_i \boldsymbol{j} = \boldsymbol{D}^\top v \phi'
     typst: frac(1, 4) sum_(i = 1)^4 bold(P)_i^top sqrt(v) bold(Sigma)^(-1) sqrt(v) bold(P)_i bold(j) = bold(D)^top v phi.alt
   - title: Testing factorial, no space
     tex: 'p ( x )   =    \frac{e^{-\lambda}\lambda^{x}}{ x ! }'
@@ -28,7 +28,7 @@ cases:
     tex: 'e_{f(x)}'
     typst: e_(f(x))
   - title: Text Functions
-    tex: '\text{diag}({\mathbf{v}}) \mathbf{D}\mathbf{M}_f(\sigma^{-1})^{-1}\mathbf{D}^\top\text{diag}({\mathbf{v}})\phi = \mathbf{q}'
+    tex: '\text{diag}({\boldsymbol{v}}) \boldsymbol{D}\boldsymbol{M}_f(\sigma^{-1})^{-1}\boldsymbol{D}^\top\text{diag}({\boldsymbol{v}})\phi = \boldsymbol{q}'
     typst: '"diag"(bold(v)) bold(D) bold(M)_f (sigma^(-1))^(-1) bold(D)^top "diag"(bold(v)) phi.alt = bold(q)'
   - title: Single Char Text
     tex: \text{a}
@@ -37,16 +37,16 @@ cases:
     tex: 'q = \pm I'
     typst: q = plus.minus I
   - title: Comma inside function
-    tex: '\mathbf{j_x, j_y}'
+    tex: '\boldsymbol{j_x, j_y}'
     typst: 'bold(j_x comma j_y)'
   - title: Nested scripts
     tex: 'r_{s^+}'
     typst: 'r_(s^+)'
   - title: Nested functions
-    tex: '\mathbf{m}_\text{ref}'
+    tex: '\boldsymbol{m}_\text{ref}'
     typst: 'bold(m)_("ref")'
   - title: left and right brackets
-    tex: '\left[ \mathbf{A} \right) \left\{b \right)'
+    tex: '\left[ \boldsymbol{A} \right) \left\{b \right)'
     typst: 'lr([ bold(A))) lr({b))'
   - title: lr
     tex: \left| a + \frac{1}{3} \right|^2
@@ -61,13 +61,13 @@ cases:
     tex: '\operatorname{a}'
     typst: op("a")
   - title: scripts
-    tex: '\mathbf{k}_{Av} \mathbf{k}^{Av}'
+    tex: '\boldsymbol{k}_{Av} \boldsymbol{k}^{Av}'
     typst: 'bold(k)_(A v) bold(k)^(A v)'
   - title: scripts
     tex: |-
-      \mathbf{D}
+      \boldsymbol{D}
       \\
-      \mathbf{G}_{z}
+      \boldsymbol{G}_{z}
     typst: |-
       bold(D) \
       bold(G)_z
@@ -78,17 +78,17 @@ cases:
           \left[
               \frac{1}{\Delta t}
               \frac{\partial \boldsymbol{\theta}^{n+1}}{\partial\boldsymbol{\psi}^{n+1}}
-              -\mathbf{D}
-              \text{diag}\left( \mathbf{G} \boldsymbol{\psi}^{n+1} \right)
-              \frac{\partial \mathbf{k}_{Av}}{\partial\boldsymbol{\psi}^{n+1}}
-              -\mathbf{D}
-              \text{diag}\left( \mathbf{k}_{Av}(\boldsymbol{\psi}^{n+1},\mathbf{m}) \right)
-              \mathbf{G}
-              - \mathbf{G}_{z}
-              \frac{\partial \mathbf{k}_{Av}}{\partial\boldsymbol{\psi}^{n+1}}
+              -\boldsymbol{D}
+              \text{diag}\left( \boldsymbol{G} \boldsymbol{\psi}^{n+1} \right)
+              \frac{\partial \boldsymbol{k}_{Av}}{\partial\boldsymbol{\psi}^{n+1}}
+              -\boldsymbol{D}
+              \text{diag}\left( \boldsymbol{k}_{Av}(\boldsymbol{\psi}^{n+1},\boldsymbol{m}) \right)
+              \boldsymbol{G}
+              - \boldsymbol{G}_{z}
+              \frac{\partial \boldsymbol{k}_{Av}}{\partial\boldsymbol{\psi}^{n+1}}
           \right]
-      }^{\mathbf{A}_0(\boldsymbol{\psi}^{n+1})}
-      \frac{\partial \boldsymbol{\psi}^{n+1}}{\partial\mathbf{m}}
+      }^{\boldsymbol{A}_0(\boldsymbol{\psi}^{n+1})}
+      \frac{\partial \boldsymbol{\psi}^{n+1}}{\partial\boldsymbol{m}}
       \nonumber\\
       +
       \underbrace{
@@ -96,18 +96,18 @@ cases:
               -\frac{1}{\Delta t}
               \frac{\partial \boldsymbol{\theta}^n}{\partial\boldsymbol{\psi}^n}
           \right]
-      }_{\mathbf{A}_{-1}(\boldsymbol{\psi}^n)}
-      \frac{\partial \boldsymbol{\psi}^n}{\partial\mathbf{m}}
+      }_{\boldsymbol{A}_{-1}(\boldsymbol{\psi}^n)}
+      \frac{\partial \boldsymbol{\psi}^n}{\partial\boldsymbol{m}}
       =
       \underbrace{
       \left[
-          -\mathbf{D}
-          \text{diag}\left( \mathbf{G} \boldsymbol{\psi}^{n+1} \right)
-          \frac{\partial \mathbf{k}_{Av}}{\partial\mathbf{m}}
-          -\mathbf{G}_{z}
-          \frac{\partial \mathbf{k}_{Av}}{\partial\mathbf{m}}
+          -\boldsymbol{D}
+          \text{diag}\left( \boldsymbol{G} \boldsymbol{\psi}^{n+1} \right)
+          \frac{\partial \boldsymbol{k}_{Av}}{\partial\boldsymbol{m}}
+          -\boldsymbol{G}_{z}
+          \frac{\partial \boldsymbol{k}_{Av}}{\partial\boldsymbol{m}}
       \right]
-      }_{\mathbf{B}(\psi^{n+1})}&
+      }_{\boldsymbol{B}(\psi^{n+1})}&
       \end{align*}
     typst: |-
       overbrace([ frac(1, Delta t) frac(diff bold(theta)^(n + 1), diff bold(psi)^(n + 1)) - bold(D) "diag"(bold(G) bold(psi)^(n + 1)) frac(diff bold(k)_(A v), diff bold(psi)^(n + 1)) - bold(D) "diag"(bold(k)_(A v)(bold(psi)^(n + 1) comma bold(m))) bold(G) - bold(G)_z frac(diff bold(k)_(A v), diff bold(psi)^(n + 1)) ], bold(A)_0 (bold(psi)^(n + 1))) frac(diff bold(psi)^(n + 1), diff bold(m)) \
