@@ -16,12 +16,12 @@ npm install tex2typst
 ## Or just loading it in a web page
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/tex2typst@0.0.19/dist/tex2typst.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tex2typst@0.1.20/dist/tex2typst.min.js"></script>
 <!-- or  -->
-<script src="https://unpkg.com/tex2typst@0.0.19/dist/tex2typst.min.js"></script>
+<script src="https://unpkg.com/tex2typst@0.1.20/dist/tex2typst.min.js"></script>
 ```
 
-Replace `0.0.19` with the latest version number in case this README is outdated.
+Replace `0.1.20` with the latest version number in case this README is outdated.
 
 ## Usage
 
