@@ -119,3 +119,6 @@ cases:
   - title: mathbf
     tex: \mathbf{A}
     typst: upright(bold(A))
+  - title: slash
+    tex: 1/2
+    typst: 1 \/ 2
