@@ -19,6 +19,10 @@ export const symbolMap = new Map<string, string>([
     ['overline', 'overline'], // same
     ['underline', 'underline'], // same
     ['bar', 'macron'],
+    ['dbinom', 'binom'],
+    ['tbinom', 'binom'],
+    ['dfrac', 'frac'],
+    ['tfrac', 'frac'],
 
     ['boldsymbol', 'bold'],
     ['mathbf', 'bold'],

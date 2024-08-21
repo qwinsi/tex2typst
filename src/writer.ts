@@ -103,7 +103,7 @@ export class TypstWriter {
 
             }
 
-            if (!base) {
+            if (base.type === 'empty') {
                 this.queue.push({ type: 'text', content: '' });
             } else {
                 this.appendWithBracketsIfNeeded(base);
@@ -210,14 +210,6 @@ export class TypstWriter {
                 if (this.preferTypstIntrinsic && TYPST_INTRINSIC_SYMBOLS.includes(text)) {
                     // e.g. we prefer just sech over op("sech")
                     this.queue.push({ type: 'symbol', content: text});
-                } else if (text.startsWith('SyMb01-')) {
-                    // special hacks made in parseTex()
-                    const special_symbol = text.substring(7);
-                    if (special_symbol === 'newline') {
-                        this.queue.push({ type: 'newline', content: '\n'});
-                        return;
-                    }
-                    this.queue.push({ type: 'symbol', content: '\\' + special_symbol});
                 } else {
                     this.queue.push({ type: 'symbol', content: 'op' });
                     this.queue.push({ type: 'atom', content: '('});
@@ -233,6 +225,9 @@ export class TypstWriter {
             this.append(arg0);
             this.queue.push({ type: 'atom', content: ')'});
             this.insideFunctionDepth --;
+        } else if (node.type === 'newline') {
+            this.queue.push({ type: 'newline', content: '\n'});
+            return;
         } else if (node.type === 'align') {
             const matrix = node.irregularData as TexNode[][];
             matrix.forEach((row, i) => {

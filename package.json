@@ -1,6 +1,6 @@
 {
   "name": "tex2typst",
-  "version": "0.1.20",
+  "version": "0.2.0",
   "description": "JavaScript library for converting TeX code to Typst",
   "type": "module",
   "main": "dist/index.js",
@@ -30,7 +30,5 @@
     "typescript": "^5.5.3",
     "vitest": "^2.0.2"
   },
-  "dependencies": {
-    "katex": "^0.16.11"
-  }
+  "dependencies": {}
 }

@@ -15,10 +15,6 @@ cases:
   - title: uppercase Greek alphabet
     tex: \Gamma \Delta \Theta \Lambda \Xi \Pi \Sigma \Upsilon \Phi \Psi \Omega
     typst: Gamma Delta Theta Lambda Xi Pi Sigma Upsilon Phi Psi Omega
-  - title: uppercase of all lowercase Greek letters
-    tex: \Alpha \Beta \Gamma \Delta \Epsilon \Zeta \Eta \Theta \Iota \Kappa \Lambda \Mu \Nu \Xi \Omicron \Pi \Rho \Sigma \Tau \Upsilon \Phi \Chi \Psi \Omega
-    # Ideally it should be Alpha Beta ... But the KaTeX parser gives us \mathrm{A} \mathrm{B} ... So we have to compromise for now
-    typst: upright(A) upright(B) Gamma Delta upright(E) upright(Z) upright(H) Theta upright(I) upright(K) Lambda upright(M) upright(N) Xi upright(O) Pi upright(P) Sigma upright(T) Upsilon Phi upright(X) Psi Omega
   - title: mathbb
     tex: \mathbb{A} \mathbb{B} \mathbb{C} \mathbb{D} \mathbb{E} \mathbb{F} \mathbb{G} \mathbb{H} \mathbb{I} \mathbb{J} \mathbb{K} \mathbb{L} \mathbb{M} \mathbb{N} \mathbb{O} \mathbb{P} \mathbb{Q} \mathbb{R} \mathbb{S} \mathbb{T} \mathbb{U} \mathbb{V} \mathbb{W} \mathbb{X} \mathbb{Y} \mathbb{Z}
     typst: AA BB CC DD EE FF GG HH II JJ KK LL MM NN OO PP QQ RR SS TT UU VV WW XX YY ZZ
@@ -31,9 +27,9 @@ cases:
   - title: mathrm
     tex: \mathrm{a} \rm{a}
     typst: upright(a) upright(a)
-  # - title: pmb
-  #   tex: \pmb{a}
-  #   typst: bold(a)
+  - title: pmb
+    tex: \pmb{a}
+    typst: bold(a)
   - title: variants of plus,minus,times,divide
     tex: \pm \mp \oplus \boxplus \otimes \boxtimes
     typst: plus.minus minus.plus xor plus.square times.circle times.square

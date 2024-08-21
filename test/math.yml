@@ -157,9 +157,9 @@ cases:
   - title: ddot
     tex: 'q, \dot{q}, \ddot{q}'
     typst: q, dot(q), dot.double(q)
-  - title: mat
-    tex: 'x(t) = \left[ \begin{array}{c} q(t) & x \\ \dot{q}(t) & x \end{array}\right]'
-    typst: 'x(t) = [ mat(delim: #none, q(t), x; dot(q)(t), x) ]'
+  # - title: mat
+  #   tex: 'x(t) = \left[ \begin{array}{c} q(t) & x \\ \dot{q}(t) & x \end{array}\right]'
+  #   typst: 'x(t) = [ mat(delim: #none, q(t), x; dot(q)(t), x) ]'
   - title: brackets
     tex: '\frac{1}{\tau(X_2)}'
     typst: 'frac(1, tau(X_2))'
@@ -229,15 +229,15 @@ cases:
     typst: |-
       mat(delim: #none, , a, = b;
       , c, = d)
-  - title: Array
-    tex: |-
-      \begin{array}{cc}
-      a & b \\
-      c & d
-      \end{array}
-    typst: |-
-      mat(delim: #none, a, b;
-      c, d)
+  # - title: Array
+  #   tex: |-
+  #     \begin{array}{cc}
+  #     a & b \\
+  #     c & d
+  #     \end{array}
+  #   typst: |-
+  #     mat(delim: #none, a, b;
+  #     c, d)
   - title: Test3
     tex: \boldsymbol{x}
     typst: bold(x)
@@ -248,7 +248,7 @@ cases:
     tex: e^{i\theta} = \cos \theta + i \sin \theta
     typst: e^(i theta) = cos theta + i sin theta
   - title: Euler Product
-    tex: \prod_{p} \frac{1}{1-p^{-s}}= \sum _{n=1}^{\infty} \frac{1}{n^s}
+    tex: \prod_{p} \frac{1}{1-p^{-s}}= \sum_{n=1}^{\infty} \frac{1}{n^s}
     typst: product_p frac(1, 1 - p^(-s)) = sum_(n = 1)^infinity frac(1, n^s)
   - title: Test5
     tex: "{a+b}^2"

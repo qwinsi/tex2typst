@@ -2,7 +2,7 @@ import { describe, it, test, expect } from 'vitest';
 import yaml from 'js-yaml';
 import path from 'node:path';
 import fs from 'node:fs';
-import { parseTex, KatexNodeToTexNodeError } from '../src/parser';
+import { parseTex, LatexNodeToTexNodeError } from '../src/parser';
 import { tex2typst } from '../src/index';
 import { TypstWriterError } from '../src/writer';
 import { Tex2TypstOptions, TexNode } from '../src/types';
@@ -52,7 +52,7 @@ caseFiles.forEach(({ title, cases }) => {
           expect(result).toBe(typst);
         } catch (e) {
           console.log(`====== 😭 Error ======`);
-          if (e instanceof KatexNodeToTexNodeError || e instanceof TypstWriterError) {
+          if (e instanceof LatexNodeToTexNodeError || e instanceof TypstWriterError) {
             console.log(e.node);
           }
           if (tex_node !== null) {

@@ -1,10 +1,16 @@
-export interface KatexParseNode {
+export interface LatexParseNode {
     type: string;
-    mode: string;
-    text?: string;
-    body?: KatexParseNode | KatexParseNode[] | KatexParseNode[][];
-    loc?: any;
+    content?: string;
+    arg1?: LatexParseNode;
+    arg2?: LatexParseNode;
+    args?: LatexParseNode[];
+    base?: LatexParseNode;
+    sub?: LatexParseNode;
+    sup?: LatexParseNode;
+    exponent?: LatexParseNode;
+    body?: LatexParseNode | LatexParseNode[] | LatexParseNode[][];
 }
+
 
 export interface TexSupsubData {
     base: TexNode;

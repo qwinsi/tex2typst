@@ -23,6 +23,8 @@ npm install tex2typst
 
 Replace `0.1.20` with the latest version number in case this README is outdated.
 
+The size of minimized library `tex2typst.min.js` is about 23 KB.
+
 ## Usage
 
 ### Basic usage
@@ -60,7 +62,7 @@ graph LR
     tex[TeX code] --parser--> ast[TeX AST] --writer--> typst[Typst code]
 ```
 
-- parser: Implemented in function `parseTex()`. At present, it depends on the parser implemented by [KaTeX](https://github.com/KaTeX/KaTeX).
+- parser: Implemented in class `LatexParser()`.
 - writer: Implemented in class `TypstWriter()`
 
 ## Contributing
