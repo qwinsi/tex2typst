@@ -74,7 +74,7 @@ export class TypstWriter {
     }
 
     public append(node: TexNode) {
-        if (node.type === 'empty') {
+        if (node.type === 'empty' || node.type === 'whitespace') {
             return;
         } else if (node.type === 'ordgroup') {
             // const index = this.startBlock();
@@ -86,12 +86,14 @@ export class TypstWriter {
                 content = 'comma';
             }
             this.queue.push({ type: 'atom', content: content });
+        } else if (node.type === 'token') {
+            this.queue.push({ type: 'token', content: node.content });
         } else if (node.type === 'symbol') {
             this.queue.push({ type: 'symbol', content: node.content });
         } else if (node.type === 'text') {
             this.queue.push(node as TypstNode)
         } else if (node.type === 'supsub') {
-            let { base, sup, sub } = node.irregularData as TexSupsubData;
+            let { base, sup, sub } = node.data as TexSupsubData;
 
             // Special logic for overbrace
             if (base && base.type === 'unaryFunc' && base.content === '\\overbrace' && sup) {
@@ -134,7 +136,7 @@ export class TypstWriter {
         } else if (node.type === 'leftright') {
             const [left, body, right] = node.args!;
             // These pairs will be handled by Typst compiler by default. No need to add lr()
-            if (["[]", "()", "{}", "\\lfloor\\rfloor", "\\lceil\\rceil"].includes(left.content + right.content)) {
+            if (["[]", "()", "\\{\\}", "\\lfloor\\rfloor", "\\lceil\\rceil"].includes(left.content + right.content)) {
                 this.append(left);
                 this.append(body);
                 this.append(right);
@@ -163,12 +165,12 @@ export class TypstWriter {
         } else if (node.type === 'unaryFunc') {
             const func_symbol: TypstNode = { type: 'symbol', content: node.content };
             const arg0 = node.args![0];
-            if (node.content === '\\sqrt' && node.irregularData) {
+            if (node.content === '\\sqrt' && node.data) {
                 func_symbol.content = 'root';
                 this.queue.push(func_symbol);
                 this.insideFunctionDepth ++;
                 this.queue.push({ type: 'atom', content: '('});
-                this.append(node.irregularData as TexSqrtData); // the number of times to take the root
+                this.append(node.data as TexSqrtData); // the number of times to take the root
                 this.queue.push({ type: 'atom', content: ','});
                 this.append(arg0);
                 this.queue.push({ type: 'atom', content: ')'});
@@ -189,7 +191,7 @@ export class TypstWriter {
                 return;
             } else if (node.content === '\\mathbb') {
                 const body = node.args![0];
-                if (body.type === 'symbol' && /^[A-Z]$/.test(body.content)) {
+                if (body.type === 'token' && /^[A-Z]$/.test(body.content)) {
                     // \mathbb{R} -> RR
                     this.queue.push({ type: 'symbol', content: body.content + body.content});
                     return;
@@ -228,53 +230,63 @@ export class TypstWriter {
         } else if (node.type === 'newline') {
             this.queue.push({ type: 'newline', content: '\n'});
             return;
-        } else if (node.type === 'align') {
-            const matrix = node.irregularData as TexNode[][];
-            matrix.forEach((row, i) => {
-                row.forEach((cell, j) => {
-                    if (j > 0) {
-                        this.queue.push({ type: 'atom', content: '&' });
-                    }
-                    this.append(cell);
-                });
-                if (i < matrix.length - 1) {
-                    this.queue.push({ type: 'symbol', content: '\\\\' });
-                }
-            });
-        } else if (node.type === 'matrix') {
-            const matrix = node.irregularData as TexNode[][];
-            this.queue.push({ type: 'symbol', content: 'mat' });
-            this.insideFunctionDepth ++; 
-            this.queue.push({ type: 'atom', content: '('});
-            this.queue.push({type: 'symbol', content: 'delim: #none, '});
-            matrix.forEach((row, i) => {
-                row.forEach((cell, j) => {
-                    // There is a leading & in row
-                    if (cell.type === 'ordgroup' && cell.args!.length === 0) {
-                        this.queue.push({ type: 'atom', content: ',' });
-                        return;
-                    }
-                    // if (j == 0 && cell.type === 'newline' && cell.content === '\n') {
-                        // return;
-                    // }
-                    this.append(cell);
-                    // cell.args!.forEach((n) => this.append(n));
-                    if (j < row.length - 1) {
-                        this.queue.push({ type: 'atom', content: ',' });
-                    } else {
-                        if (i < matrix.length - 1) {
-                            this.queue.push({ type: 'atom', content: ';' });
+        } else if (node.type === 'beginend') {
+            if (node.content!.startsWith('align')) {
+                // align, align*, alignat, alignat*, aligned, etc.
+                const matrix = node.data as TexNode[][];
+                matrix.forEach((row, i) => {
+                    row.forEach((cell, j) => {
+                        if (j > 0) {
+                            this.queue.push({ type: 'atom', content: '&' });
                         }
+                        this.append(cell);
+                    });
+                    if (i < matrix.length - 1) {
+                        this.queue.push({ type: 'symbol', content: '\\\\' });
                     }
                 });
-            });
-            this.queue.push({ type: 'atom', content: ')'});
-            this.insideFunctionDepth --;
+            } else {
+                const matrix = node.data as TexNode[][];
+                this.queue.push({ type: 'symbol', content: 'mat' });
+                this.insideFunctionDepth ++; 
+                this.queue.push({ type: 'atom', content: '('});
+                this.queue.push({type: 'symbol', content: 'delim: #none, '});
+                matrix.forEach((row, i) => {
+                    row.forEach((cell, j) => {
+                        // There is a leading & in row
+                        if (cell.type === 'ordgroup' && cell.args!.length === 0) {
+                            this.queue.push({ type: 'atom', content: ',' });
+                            return;
+                        }
+                        // if (j == 0 && cell.type === 'newline' && cell.content === '\n') {
+                            // return;
+                        // }
+                        this.append(cell);
+                        // cell.args!.forEach((n) => this.append(n));
+                        if (j < row.length - 1) {
+                            this.queue.push({ type: 'atom', content: ',' });
+                        } else {
+                            if (i < matrix.length - 1) {
+                                this.queue.push({ type: 'atom', content: ';' });
+                            }
+                        }
+                    });
+                });
+                this.queue.push({ type: 'atom', content: ')'});
+                this.insideFunctionDepth --;
+            }
+        } else if (node.type === 'matrix') {
         } else if (node.type === 'unknownMacro') {
             if (this.nonStrict) {
                 this.queue.push({ type: 'symbol', content: node.content });
             } else {
                 throw new TypstWriterError(`Unknown macro: ${node.content}`, node);
+            }
+        } else if (node.type === 'control') {
+            if (node.content === '\\\\') {
+                this.queue.push({ type: 'symbol', content: node.content });
+            } else {
+                throw new TypstWriterError(`Unknown control sequence: ${node.content}`, node);
             }
         } else if (node.type === 'comment') {
             this.queue.push({ type: 'comment', content: node.content });
@@ -291,6 +303,7 @@ export class TypstWriter {
                     str = node.content;
                     break;
                 case 'symbol':
+                case 'token':
                     str = convertToken(node.content);
                     break;
                 case 'text':
@@ -320,7 +333,7 @@ export class TypstWriter {
         const is_single_atom = (node.type === 'atom');
         const is_single_function = (node.type === 'unaryFunc' || node.type === 'binaryFunc' || node.type === 'leftright');     
 
-        const is_single = ['atom', 'symbol', 'unaryFunc', 'binaryFunc', 'leftright'].includes(node.type);
+        const is_single = ['atom', 'symbol', 'token', 'unaryFunc', 'binaryFunc', 'leftright'].includes(node.type);
         if (is_single) {
             this.append(node);
         } else {

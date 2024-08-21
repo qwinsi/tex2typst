@@ -1,4 +1,4 @@
-import { TexNode, LatexParseNode, TexSupsubData } from "./types";
+import { TexNode, TexSupsubData } from "./types";
 
 const UNARY_COMMANDS = [
     'sqrt',
@@ -252,7 +252,7 @@ function eat_primes(latex: string, start: number): number {
 }
 
 
-class LatexParserError extends Error {
+export class LatexParserError extends Error {
     constructor(message: string) {
         super(message);
         this.name = 'LatexParserError';
@@ -260,7 +260,7 @@ class LatexParserError extends Error {
 }
 
 
-type ParseResult = [LatexParseNode, number];
+type ParseResult = [TexNode, number];
 
 export class LatexParser {
     space_sensitive: boolean;
@@ -271,8 +271,8 @@ export class LatexParser {
         this.newline_sensitive = newline_sensitive;
     }
 
-    parse(latex: string): LatexParseNode {
-        const results: LatexParseNode[] = [];
+    parse(latex: string): TexNode {
+        const results: TexNode[] = [];
         let pos = 0;
 
         while (pos < latex.length) {
@@ -295,14 +295,14 @@ export class LatexParser {
         } else if (results.length === 1) {
             return results[0];
         } else {
-            return { type: 'ordgroup', args: results };
+            return { type: 'ordgroup', content: '', args: results };
         }
     }
 
     parseNextExpr(latex: string, start: number): ParseResult {
         let [base, pos] = this.parseNextExprWithoutSupSub(latex, start);
-        let sub: LatexParseNode | null = null;
-        let sup: LatexParseNode | null = null;
+        let sub: TexNode | null = null;
+        let sup: TexNode | null = null;
         let num_prime = 0;
 
         num_prime += eat_primes(latex, pos);
@@ -331,14 +331,14 @@ export class LatexParser {
         }
 
         if (sub !== null || sup !== null || num_prime > 0) {
-            const res = { type: 'supsub', base } as LatexParseNode;
+            const res: TexSupsubData = { base };
             if (sub) {
                 res.sub = sub;
             }
             if (num_prime > 0) {
-                res.sup = { type: 'ordgroup', args:  [] };
+                res.sup = { type: 'ordgroup', content: '', args:  [] };
                 for (let i = 0; i < num_prime; i++) {
-                    res.sup.args!.push({ type: 'command', content: 'prime' });
+                    res.sup.args!.push({ type: 'symbol', content: '\\prime' });
                 }
                 if (sup) {
                     res.sup.args!.push(sup);
@@ -349,7 +349,7 @@ export class LatexParser {
             } else if (sup) {
                 res.sup = sup;
             }
-            return [res, pos];
+            return [{type: 'supsub',  content: '', data: res }, pos];
         } else {
             return [base, pos];
         }
@@ -369,7 +369,7 @@ export class LatexParser {
             if (firstTwoChars === '\\\\') {
                 return [{ type: 'control', content: '\\\\' }, start + 2];
             } else if (firstTwoChars === '\\{' || firstTwoChars === '\\}') {
-                return [{ type: 'token-parenthesis', content: firstTwoChars }, start + 2];
+                return [{ type: 'token', content: firstTwoChars }, start + 2];
             } else if (['\\%', '\\$', '\\&', '\\#', '\\_'].includes(firstTwoChars)) {
                 return [{ type: 'token', content: firstTwoChars }, start + 2];
             } else if (latex.slice(start).startsWith('\\begin{')) {
@@ -390,29 +390,31 @@ export class LatexParser {
             while (pos < latex.length && isdigit(latex[pos])) {
                 pos += 1;
             }
-            return [{ type: 'token-number', content: latex.slice(start, pos) }, pos];
+            return [{ type: 'token', content: latex.slice(start, pos) }, pos];
         } else if (isalpha(firstChar)) {
-            return [{ type: 'token-letter-var', content: firstChar }, start + 1];
+            return [{ type: 'token', content: firstChar }, start + 1];
         } else if ('+-*/=<>!'.includes(firstChar)) {
-            return [{ type: 'token-operator', content: firstChar }, start + 1];
+            return [{ type: 'token', content: firstChar }, start + 1];
         } else if ('.,;?'.includes(firstChar)) {
             return [{ type: 'atom', content: firstChar }, start + 1];
         } else if ('()[]'.includes(firstChar)) {
-            return [{ type: 'token-parenthesis', content: firstChar }, start + 1];
+            return [{ type: 'token', content: firstChar }, start + 1];
         } else if (firstChar === '_') {
             let [sub, pos] = this.parseNextExpr(latex, start + 1);
-            let sup: LatexParseNode | undefined = undefined;
+            let sup: TexNode | undefined = undefined;
             if (pos < latex.length && latex[pos] === '^') {
                 [sup, pos] = this.parseNextExpr(latex, pos + 1);
             }
-            return [{ type: 'supsub', base: EMPTY_NODE, sub, sup }, pos];
+            const data = { base: EMPTY_NODE, sub, sup };
+            return [{ type: 'supsub', content: '', data: data }, pos];
         } else if (firstChar === '^') {
             let [sup, pos] = this.parseNextExpr(latex, start + 1);
-            let sub: LatexParseNode | undefined = undefined;
+            let sub: TexNode | undefined = undefined;
             if (pos < latex.length && latex[pos] === '_') {
                 [sub, pos] = this.parseNextExpr(latex, pos + 1);
             }
-            return [{ type: 'supsub', base: EMPTY_NODE, sub, sup }, pos];
+            const data = { base: EMPTY_NODE, sub, sup };
+            return [{ type: 'supsub', content: '', data: data }, pos];
         } else if (firstChar === ' ') {
             let pos = start;
             while (pos < latex.length && latex[pos] === ' ') {
@@ -441,7 +443,7 @@ export class LatexParser {
         pos += command.length;
         const paramNum = get_command_param_num(command);
         if (paramNum === 0) {
-            return [{ type: 'command', content: command }, pos];
+            return [{ type: 'symbol', content: '\\' + command }, pos];
         } else if (paramNum === 1) {
             if (command === 'sqrt' && pos < latex.length && latex[pos] === '[') {
                 const posLeftSquareBracket = pos;
@@ -449,7 +451,7 @@ export class LatexParser {
                 const exprInside = latex.slice(posLeftSquareBracket + 1, posRightSquareBracket);
                 const exponent = this.parse(exprInside);
                 const [arg1, newPos] = this.parseNextExprWithoutSupSub(latex, posRightSquareBracket + 1);
-                return [{ type: 'command', content: command, arg1, exponent }, newPos];
+                return [{ type: 'unaryFunc', content: '\\' + command, args: [arg1], data: exponent }, newPos];
             } else if (command === 'text') {
                 assert(latex[pos] === '{');
                 const posClosingBracket = find_closing_curly_bracket(latex, pos);
@@ -457,12 +459,12 @@ export class LatexParser {
                 return [{ type: 'text', content: text }, posClosingBracket + 1];
             } else {
                 let [arg1, newPos] = this.parseNextExprWithoutSupSub(latex, pos);
-                return [{ type: 'command', content: command, arg1 }, newPos];
+                return [{ type: 'unaryFunc', content: '\\' + command, args: [arg1] }, newPos];
             }
         } else if (paramNum === 2) {
             const [arg1, pos1] = this.parseNextExprWithoutSupSub(latex, pos);
             const [arg2, pos2] = this.parseNextExprWithoutSupSub(latex, pos1);
-            return [{ type: 'command', content: command, arg1, arg2 }, pos2];
+            return [{ type: 'binaryFunc', content: '\\' + command, args: [arg1, arg2] }, pos2];
         } else {
             throw new Error( 'Invalid number of parameters');
         }
@@ -498,7 +500,12 @@ export class LatexParser {
         pos += rightDelimiter.length;
         const exprInside = latex.slice(exprInsideStart, exprInsideEnd);
         const body = this.parse(exprInside);
-        const res = { type: 'leftright', left: leftDelimiter, right: rightDelimiter, body };
+        const args = [
+            { type: 'token', content: leftDelimiter },
+            body,
+            { type: 'token', content: rightDelimiter }
+        ]
+        const res = { type: 'leftright', content: '', args: args };
         return [res, pos];
     }
 
@@ -530,16 +537,16 @@ export class LatexParser {
         let exprInside = latex.slice(exprInsideStart, exprInsideEnd);
         exprInside = exprInside.trimEnd(); // ignore whitespaces and '\n' before \end{envName}
         const body = this.parseAligned(exprInside);
-        const res = { type: 'beginend', content: envName, body };
+        const res = { type: 'beginend', content: envName, data: body };
         return [res, closingIdx + 1];
     }
 
-    parseAligned(latex: string): LatexParseNode[][] {
+    parseAligned(latex: string): TexNode[][] {
         let pos = 0;
-        const allRows: LatexParseNode[][] = [];
-        let row: LatexParseNode[] = [];
+        const allRows: TexNode[][] = [];
+        let row: TexNode[] = [];
         allRows.push(row);
-        let group: LatexParseNode = { type: 'ordgroup', args: [] };
+        let group: TexNode = { type: 'ordgroup', content: '', args: [] };
         row.push(group);
 
         while (pos < latex.length) {
@@ -551,11 +558,11 @@ export class LatexParser {
                 continue;
             } else if (res.type === 'control' && res.content === '\\\\') {
                 row = [];
-                group = { type: 'ordgroup', args: [] };
+                group = { type: 'ordgroup', content: '', args: [] };
                 row.push(group);
                 allRows.push(row);
             } else if (res.type === 'control' && res.content === '&') {
-                group = { type: 'ordgroup', args: [] };
+                group = { type: 'ordgroup', content: '', args: [] };
                 row.push(group);
             } else {
                 group.args!.push(res);
@@ -567,147 +574,10 @@ export class LatexParser {
 }
 
 
-export class LatexNodeToTexNodeError extends Error {
-    node: LatexParseNode;
-
-    constructor(message: string, node: LatexParseNode) {
-        super(message);
-        this.name = "LatexNodeToTexNodeError";
-        this.node = node;
-    }
-}
-
-function latexNodeToTexNode(node: LatexParseNode): TexNode {
-    let res = {} as TexNode;
-    switch (node.type) {
-        case 'ordgroup':
-            res.type = 'ordgroup';
-            res.args = (node.args as LatexParseNode[]).map((n: LatexParseNode) => latexNodeToTexNode(n));
-            if (res.args!.length === 1) {
-                res = res.args![0] as TexNode;
-            }
-            break;
-        case 'empty':
-            res.type = 'empty';
-            res.content = '';
-            break;
-        case 'atom':
-            res.type = 'atom';
-            res.content = node.content!;
-            break;
-        case 'token':
-        case 'token-letter-var':
-        case 'token-number':
-        case 'token-operator':
-        case 'token-parenthesis':
-            res.type = 'symbol';
-            res.content = node.content!;
-            break;
-        case 'supsub':
-            res.type = 'supsub';
-            res.irregularData = {} as TexSupsubData;
-            if (node['base']) {
-                res.irregularData.base = latexNodeToTexNode(node['base']);
-            }
-            if (node['sup']) {
-                res.irregularData.sup = latexNodeToTexNode(node['sup']);
-            }
-            if (node['sub']) {
-                res.irregularData.sub = latexNodeToTexNode(node['sub']);
-            }
-            break;
-        case 'leftright':
-            res.type = 'leftright';
-            
-            const body = latexNodeToTexNode(node.body as LatexParseNode);
-
-            let left: string = node['left']!;
-            if (left === "\\{") {
-                left = "{";
-            }
-            let right: string = node['right']!;
-            if (right === "\\}") {
-                right = "}";
-            }
-            const is_atom = (str:string) => (['(', ')', '[', ']', '{', '}'].includes(str));
-            res.args = [
-                { type: is_atom(left)? 'atom': 'symbol', content: left },
-                body,
-                { type: is_atom(right)? 'atom': 'symbol', content: right}
-            ];
-            break;
-        case 'beginend':
-            if (node.content?.startsWith('align')) {
-                // align, align*, alignat, alignat*, aligned, etc.
-                res.type = 'align';
-            } else {
-                res.type = 'matrix';
-            }
-            res.content = node.content!;
-            res.irregularData = (node.body as LatexParseNode[][]).map((row: LatexParseNode[]) => {
-                return row.map((n: LatexParseNode) => latexNodeToTexNode(n));
-            });
-            break;
-        case 'command':
-            const num_args = get_command_param_num(node.content!);
-            res.content = '\\' + node.content!;
-            if (num_args === 0) {
-                res.type = 'symbol';
-            } else if (num_args === 1) {
-                res.type = 'unaryFunc';
-                res.args = [
-                    latexNodeToTexNode(node.arg1 as LatexParseNode)
-                ]
-                if (node.content === 'sqrt') {
-                    if (node.exponent) {
-                        res.irregularData = latexNodeToTexNode(node.exponent) as TexNode;
-                    }
-                }
-            } else if (num_args === 2) {
-                res.type = 'binaryFunc';
-                res.args = [
-                    latexNodeToTexNode(node.arg1 as LatexParseNode),
-                    latexNodeToTexNode(node.arg2 as LatexParseNode)
-                ]
-            } else {
-                throw new LatexNodeToTexNodeError('Invalid number of arguments', node);
-            }
-            break;
-        case 'text': 
-            res.type = 'text';
-            res.content = node.content!;
-            break;
-        case 'comment':
-            res.type = 'comment';
-            res.content = node.content!;
-            break;
-        case 'whitespace':
-            res.type = 'empty';
-            break;
-        case 'newline':
-            res.type = 'newline';
-            res.content = '\n';
-            break;
-        case 'control':
-            if (node.content === '\\\\') {
-                res.type = 'symbol';
-                res.content = node.content!;
-                break;
-            } else {
-                throw new LatexNodeToTexNodeError(`Unknown control sequence: ${node.content}`, node);
-            }
-            break;
-        default:
-            throw new LatexNodeToTexNodeError(`Unknown node type: ${node.type}`, node);
-    }
-    return res as TexNode;
-}
-
 export function parseTex(tex: string, customTexMacros: {[key: string]: string}): TexNode {
     const parser = new LatexParser();
     for (const [macro, replacement] of Object.entries(customTexMacros)) {
         tex = tex.replaceAll(macro, replacement);
     }
-    const node = parser.parse(tex);
-    return latexNodeToTexNode(node);
+    return parser.parse(tex) as TexNode;
 }
