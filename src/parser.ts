@@ -566,60 +566,6 @@ export class LatexParser {
     }
 }
 
-// Split tex into a list of tex strings and comments.
-// Each item in the returned list is either a tex snippet or a comment.
-// Each comment item is a string starting with '%'.
-function splitTex(tex: string): string[] {
-    const lines = tex.split("\n");
-    const out_tex_list: string[] = [];
-    let current_tex = "";
-    // let inside_begin_depth = 0;
-    for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
-        // if (line.includes('\\begin{')) {
-            // inside_begin_depth += line.split('\\begin{').length - 1;
-        // }
-
-        let index = -1;
-        while (index + 1 < line.length) {
-            index = line.indexOf('%', index + 1);
-            if (index === -1) {
-                // No comment in this line
-                break;
-            }
-            if (index === 0 || line[index - 1] !== '\\') {
-                // Found a comment
-                break;
-            }
-        }
-        if (index !== -1) {
-            current_tex += line.substring(0, index);
-            const comment = line.substring(index);
-            out_tex_list.push(current_tex);
-            current_tex = "";
-            out_tex_list.push(comment);
-        } else {
-            current_tex += line;
-        }
-        if (i < lines.length - 1) {
-            const has_begin_command = line.includes('\\begin{');
-            const followed_by_end_command = lines[i + 1].includes('\\end{');
-            if(!has_begin_command && !followed_by_end_command) {
-                current_tex += '\n';
-            }
-        }
-
-        // if (line.includes('\\end{')) {
-            // inside_begin_depth -= line.split('\\end{').length - 1;
-        // }
-    }
-
-    if (current_tex.length > 0) {
-        out_tex_list.push(current_tex);
-    }
-
-    return out_tex_list;
-}
 
 export class LatexNodeToTexNodeError extends Error {
     node: LatexParseNode;
@@ -632,133 +578,129 @@ export class LatexNodeToTexNodeError extends Error {
 }
 
 function latexNodeToTexNode(node: LatexParseNode): TexNode {
-    try {
-        let res = {} as TexNode;
-        switch (node.type) {
-            case 'ordgroup':
-                res.type = 'ordgroup';
-                res.args = (node.args as LatexParseNode[]).map((n: LatexParseNode) => latexNodeToTexNode(n));
-                if (res.args!.length === 1) {
-                    res = res.args![0] as TexNode;
+    let res = {} as TexNode;
+    switch (node.type) {
+        case 'ordgroup':
+            res.type = 'ordgroup';
+            res.args = (node.args as LatexParseNode[]).map((n: LatexParseNode) => latexNodeToTexNode(n));
+            if (res.args!.length === 1) {
+                res = res.args![0] as TexNode;
+            }
+            break;
+        case 'empty':
+            res.type = 'empty';
+            res.content = '';
+            break;
+        case 'atom':
+            res.type = 'atom';
+            res.content = node.content!;
+            break;
+        case 'token':
+        case 'token-letter-var':
+        case 'token-number':
+        case 'token-operator':
+        case 'token-parenthesis':
+            res.type = 'symbol';
+            res.content = node.content!;
+            break;
+        case 'supsub':
+            res.type = 'supsub';
+            res.irregularData = {} as TexSupsubData;
+            if (node['base']) {
+                res.irregularData.base = latexNodeToTexNode(node['base']);
+            }
+            if (node['sup']) {
+                res.irregularData.sup = latexNodeToTexNode(node['sup']);
+            }
+            if (node['sub']) {
+                res.irregularData.sub = latexNodeToTexNode(node['sub']);
+            }
+            break;
+        case 'leftright':
+            res.type = 'leftright';
+            
+            const body = latexNodeToTexNode(node.body as LatexParseNode);
+
+            let left: string = node['left']!;
+            if (left === "\\{") {
+                left = "{";
+            }
+            let right: string = node['right']!;
+            if (right === "\\}") {
+                right = "}";
+            }
+            const is_atom = (str:string) => (['(', ')', '[', ']', '{', '}'].includes(str));
+            res.args = [
+                { type: is_atom(left)? 'atom': 'symbol', content: left },
+                body,
+                { type: is_atom(right)? 'atom': 'symbol', content: right}
+            ];
+            break;
+        case 'beginend':
+            if (node.content?.startsWith('align')) {
+                // align, align*, alignat, alignat*, aligned, etc.
+                res.type = 'align';
+            } else {
+                res.type = 'matrix';
+            }
+            res.content = node.content!;
+            res.irregularData = (node.body as LatexParseNode[][]).map((row: LatexParseNode[]) => {
+                return row.map((n: LatexParseNode) => latexNodeToTexNode(n));
+            });
+            break;
+        case 'command':
+            const num_args = get_command_param_num(node.content!);
+            res.content = '\\' + node.content!;
+            if (num_args === 0) {
+                res.type = 'symbol';
+            } else if (num_args === 1) {
+                res.type = 'unaryFunc';
+                res.args = [
+                    latexNodeToTexNode(node.arg1 as LatexParseNode)
+                ]
+                if (node.content === 'sqrt') {
+                    if (node.exponent) {
+                        res.irregularData = latexNodeToTexNode(node.exponent) as TexNode;
+                    }
                 }
-                break;
-            case 'empty':
-                res.type = 'empty';
-                res.content = '';
-                break;
-            case 'atom':
-                res.type = 'atom';
-                res.content = node.content!;
-                break;
-            case 'token':
-            case 'token-letter-var':
-            case 'token-number':
-            case 'token-operator':
-            case 'token-parenthesis':
+            } else if (num_args === 2) {
+                res.type = 'binaryFunc';
+                res.args = [
+                    latexNodeToTexNode(node.arg1 as LatexParseNode),
+                    latexNodeToTexNode(node.arg2 as LatexParseNode)
+                ]
+            } else {
+                throw new LatexNodeToTexNodeError('Invalid number of arguments', node);
+            }
+            break;
+        case 'text': 
+            res.type = 'text';
+            res.content = node.content!;
+            break;
+        case 'comment':
+            res.type = 'comment';
+            res.content = node.content!;
+            break;
+        case 'whitespace':
+            res.type = 'empty';
+            break;
+        case 'newline':
+            res.type = 'newline';
+            res.content = '\n';
+            break;
+        case 'control':
+            if (node.content === '\\\\') {
                 res.type = 'symbol';
                 res.content = node.content!;
                 break;
-            case 'supsub':
-                res.type = 'supsub';
-                res.irregularData = {} as TexSupsubData;
-                if (node['base']) {
-                    res.irregularData.base = latexNodeToTexNode(node['base']);
-                }
-                if (node['sup']) {
-                    res.irregularData.sup = latexNodeToTexNode(node['sup']);
-                }
-                if (node['sub']) {
-                    res.irregularData.sub = latexNodeToTexNode(node['sub']);
-                }
-                break;
-            case 'leftright':
-                res.type = 'leftright';
-                
-                const body = latexNodeToTexNode(node.body as LatexParseNode);
-
-                let left: string = node['left']!;
-                if (left === "\\{") {
-                    left = "{";
-                }
-                let right: string = node['right']!;
-                if (right === "\\}") {
-                    right = "}";
-                }
-                const is_atom = (str:string) => (['(', ')', '[', ']', '{', '}'].includes(str));
-                res.args = [
-                    { type: is_atom(left)? 'atom': 'symbol', content: left },
-                    body,
-                    { type: is_atom(right)? 'atom': 'symbol', content: right}
-                ];
-                break;
-            case 'beginend':
-                if (node.content?.startsWith('align')) {
-                    // align, align*, alignat, alignat*, aligned, etc.
-                    res.type = 'align';
-                } else {
-                    res.type = 'matrix';
-                }
-                res.content = node.content!;
-                res.irregularData = (node.body as LatexParseNode[][]).map((row: LatexParseNode[]) => {
-                    return row.map((n: LatexParseNode) => latexNodeToTexNode(n));
-                });
-                break;
-            case 'command':
-                const num_args = get_command_param_num(node.content!);
-                res.content = '\\' + node.content!;
-                if (num_args === 0) {
-                    res.type = 'symbol';
-                } else if (num_args === 1) {
-                    res.type = 'unaryFunc';
-                    res.args = [
-                        latexNodeToTexNode(node.arg1 as LatexParseNode)
-                    ]
-                    if (node.content === 'sqrt') {
-                        if (node.exponent) {
-                            res.irregularData = latexNodeToTexNode(node.exponent) as TexNode;
-                        }
-                    }
-                } else if (num_args === 2) {
-                    res.type = 'binaryFunc';
-                    res.args = [
-                        latexNodeToTexNode(node.arg1 as LatexParseNode),
-                        latexNodeToTexNode(node.arg2 as LatexParseNode)
-                    ]
-                } else {
-                    throw new LatexNodeToTexNodeError('Invalid number of arguments', node);
-                }
-                break;
-            case 'text': 
-                res.type = 'text';
-                res.content = node.content!;
-                break;
-            case 'comment':
-                res.type = 'comment';
-                res.content = node.content!;
-                break;
-            case 'whitespace':
-                res.type = 'empty';
-                break;
-            case 'newline':
-                res.type = 'newline';
-                res.content = '\n';
-                break;
-            case 'control':
-                if (node.content === '\\\\') {
-                    res.type = 'symbol';
-                    res.content = node.content!;
-                    break;
-                } else {
-                    throw new LatexNodeToTexNodeError(`Unknown control sequence: ${node.content}`, node);
-                }
-                break;
-            default:
-                throw new LatexNodeToTexNodeError(`Unknown node type: ${node.type}`, node);
-        }
-        return res as TexNode;
-    } catch (e) {
-        throw e;
+            } else {
+                throw new LatexNodeToTexNodeError(`Unknown control sequence: ${node.content}`, node);
+            }
+            break;
+        default:
+            throw new LatexNodeToTexNodeError(`Unknown node type: ${node.type}`, node);
     }
+    return res as TexNode;
 }
 
 export function parseTex(tex: string, customTexMacros: {[key: string]: string}): TexNode {
