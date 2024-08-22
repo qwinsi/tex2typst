@@ -80,14 +80,12 @@ export class TypstWriter {
             // const index = this.startBlock();
             node.args!.forEach((arg) => this.append(arg));
             // this.endBlock(index);
-        } else if (node.type === 'atom') {
+        } else if (node.type === 'element') {
             let content = node.content!;
             if (node.content === ',' && this.insideFunctionDepth > 0) {
                 content = 'comma';
             }
-            this.queue.push({ type: 'atom', content: content });
-        } else if (node.type === 'token') {
-            this.queue.push({ type: 'token', content: node.content });
+            this.queue.push({ type: 'symbol', content: content });
         } else if (node.type === 'symbol') {
             this.queue.push({ type: 'symbol', content: node.content });
         } else if (node.type === 'text') {
@@ -191,7 +189,7 @@ export class TypstWriter {
                 return;
             } else if (node.content === '\\mathbb') {
                 const body = node.args![0];
-                if (body.type === 'token' && /^[A-Z]$/.test(body.content)) {
+                if (body.type === 'element' && /^[A-Z]$/.test(body.content)) {
                     // \mathbb{R} -> RR
                     this.queue.push({ type: 'symbol', content: body.content + body.content});
                     return;
@@ -303,7 +301,6 @@ export class TypstWriter {
                     str = node.content;
                     break;
                 case 'symbol':
-                case 'token':
                     str = convertToken(node.content);
                     break;
                 case 'text':
@@ -330,10 +327,7 @@ export class TypstWriter {
     }
 
     private appendWithBracketsIfNeeded(node: TexNode): boolean {
-        const is_single_atom = (node.type === 'atom');
-        const is_single_function = (node.type === 'unaryFunc' || node.type === 'binaryFunc' || node.type === 'leftright');     
-
-        const is_single = ['atom', 'symbol', 'token', 'unaryFunc', 'binaryFunc', 'leftright'].includes(node.type);
+        const is_single = ['symbol', 'element', 'unaryFunc', 'binaryFunc', 'leftright'].includes(node.type);
         if (is_single) {
             this.append(node);
         } else {

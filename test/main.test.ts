@@ -52,7 +52,7 @@ caseFiles.forEach(({ title, cases }) => {
           expect(result).toBe(typst);
         } catch (e) {
           console.log(`====== 😭 Error ======`);
-          if (e instanceof LatexParserError || e instanceof TypstWriterError) {
+          if (e instanceof TypstWriterError) {
             console.log(e.node);
           }
           if (tex_node !== null) {

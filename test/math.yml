@@ -14,7 +14,7 @@ cases:
     tex: 'p_e = 1-\mathrm{e}^{-t \lambda}'
     typst: p_e = 1 - upright(e)^(-t lambda)
   - title: Mathrm multiple
-    note: The text comes in as an argument but in one string, which needs to be treated differently
+    # The text comes in as an argument but in one string, which needs to be treated differently
     tex: 'f(x_t, \mathrm{left})'
     typst: f(x_t, upright(l e f t))
   - title: Cube root
@@ -24,7 +24,7 @@ cases:
     tex: 'e_f(x)'
     typst: e_f (x)
   - title: Simplified brackets f(x)
-    note: This doesn't actually need the extra brackets, but it is clearer!
+    # This doesn't actually need the extra brackets, but it is clearer!
     tex: 'e_{f(x)}'
     typst: e_(f(x))
   - title: Text Functions

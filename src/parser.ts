@@ -1,5 +1,6 @@
 import { TexNode, TexSupsubData } from "./types";
 
+
 const UNARY_COMMANDS = [
     'sqrt',
     'text',
@@ -60,7 +61,6 @@ function assert(condition: boolean, message: string = ''): void {
     }
 }
 
-
 function get_command_param_num(command: string): number {
     if (UNARY_COMMANDS.includes(command)) {
         return 1;
@@ -71,7 +71,148 @@ function get_command_param_num(command: string): number {
     }
 }
 
-function find_closing_curly_bracket(latex: string, start: number): number {
+const LEFT_CURLY_BRACKET: Token = {type: 'control', value: '{'};
+const RIGHT_CURLY_BRACKET: Token = {type: 'control', value: '}'};
+
+function find_closing_curly_bracket(tokens: Token[], start: number): number {
+    assert(token_eq(tokens[start], LEFT_CURLY_BRACKET));
+    let count = 1;
+    let pos = start + 1;
+
+    while (count > 0) {
+        if (pos >= tokens.length) {
+            throw new LatexParserError('Unmatched curly brackets');
+        }
+        if (token_eq(tokens[pos], LEFT_CURLY_BRACKET)) {
+            count += 1;
+        } else if (token_eq(tokens[pos], RIGHT_CURLY_BRACKET)) {
+            count -= 1;
+        }
+        pos += 1;
+    }
+
+    return pos - 1;
+}
+
+const LEFT_SQUARE_BRACKET: Token = {type: 'element', value: '['};
+const RIGHT_SQUARE_BRACKET: Token = {type: 'element', value: ']'};
+
+function find_closing_square_bracket(tokens: Token[], start: number): number {
+    assert(token_eq(tokens[start], LEFT_SQUARE_BRACKET));
+    let count = 1;
+    let pos = start + 1;
+
+    while (count > 0) {
+        if (pos >= tokens.length) {
+            throw new LatexParserError('Unmatched square brackets');
+        }
+        if (token_eq(tokens[pos], LEFT_SQUARE_BRACKET)) {
+            count += 1;
+        } else if (token_eq(tokens[pos], RIGHT_SQUARE_BRACKET)) {
+            count -= 1;
+        }
+        pos += 1;
+    }
+
+    return pos - 1;
+}
+
+
+function isalpha(char: string): boolean {
+    return 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'.includes(char);
+}
+
+function isdigit(char: string): boolean {
+    return '0123456789'.includes(char);
+}
+
+function eat_whitespaces(tokens: Token[], start: number): Token[] {
+    let pos = start;
+    while (pos < tokens.length && ['whitespace', 'newline'].includes(tokens[pos].type)) {
+        pos++;
+    }
+    return tokens.slice(start, pos);
+}
+
+
+function eat_parenthesis(tokens: Token[], start: number): Token | null {
+    const firstToken = tokens[start];
+    if (firstToken.type === 'element' && ['(', ')', '[', ']', '|', '\\{', '\\}'].includes(firstToken.value)) {
+        return firstToken;
+    } else if (firstToken.type === 'command' && ['lfloor', 'rfloor', 'lceil', 'rceil', 'langle', 'rangle'].includes(firstToken.value.slice(1))) {
+        return firstToken;
+    } else {
+        return null;
+    }
+}
+
+function eat_primes(tokens: Token[], start: number): number {
+    let pos = start;
+    while (pos < tokens.length && token_eq(tokens[pos], { type: 'element', value: "'" })) {
+        pos += 1;
+    }
+    return pos - start;
+}
+
+
+function eat_command_name(latex: string, start: number): string {
+    let pos = start;
+    while (pos < latex.length && isalpha(latex[pos])) {
+        pos += 1;
+    }
+    return latex.substring(start, pos);
+}
+
+
+
+
+const LEFT_COMMAND: Token = { type: 'command', value: '\\left' };
+const RIGHT_COMMAND: Token = { type: 'command', value: '\\right' };
+
+function find_closing_right_command(tokens: Token[], start: number): number {
+    let count = 1;
+    let pos = start;
+
+    while (count > 0) {
+        if (pos >= tokens.length) {
+            return -1;
+        }
+        if (token_eq(tokens[pos], LEFT_COMMAND)) {
+            count += 1;
+        } else if (token_eq(tokens[pos], RIGHT_COMMAND)) {
+            count -= 1;
+        }
+        pos += 1;
+    }
+
+    return pos - 1;
+}
+
+
+const BEGIN_COMMAND: Token = { type: 'command', value: '\\begin' };
+const END_COMMAND: Token = { type: 'command', value: '\\end' };
+
+
+function find_closing_end_command(tokens: Token[], start: number): number {
+    let count = 1;
+    let pos = start;
+
+    while (count > 0) {
+        if (pos >= tokens.length) {
+            return -1;
+        }
+        if (token_eq(tokens[pos], BEGIN_COMMAND)) {
+            count += 1;
+        } else if (token_eq(tokens[pos], END_COMMAND)) {
+            count -= 1;
+        }
+        pos += 1;
+    }
+
+    return pos - 1;
+}
+
+function find_closing_curly_bracket_char(latex: string, start: number): number {
     assert(latex[start] === '{');
     let count = 1;
     let pos = start + 1;
@@ -95,160 +236,121 @@ function find_closing_curly_bracket(latex: string, start: number): number {
     return pos - 1;
 }
 
-function find_closing_square_bracket(latex: string, start: number): number {
-    assert(latex[start] === '[');
-    let count = 1;
-    let pos = start + 1;
 
-    while (count > 0) {
-        if (pos >= latex.length) {
-            throw new LatexParserError('Unmatched square brackets');
-        }
-        if (latex[pos] === '[') {
-            count += 1;
-        } else if (latex[pos] === ']') {
-            count -= 1;
-        }
-        pos += 1;
-    }
-
-    return pos - 1;
+interface Token {
+    type: 'element' | 'command' | 'text' | 'comment' | 'whitespace' | 'newline' | 'control' | 'unknown';
+    value: string;
 }
 
-
-function isalpha(char: string): boolean {
-    return 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'.includes(char);
-}
-
-function isdigit(char: string): boolean {
-    return '0123456789'.includes(char);
-}
-
-
-
-function find_command(latex: string, start: number, command_name: string): number {
-    const len_slash_command = 1 + command_name.length;
-    let pos = start;
+function tokenize(latex: string): Token[] {
+    const tokens: Token[] = [];
+    let pos = 0;
 
     while (pos < latex.length) {
-        pos = latex.indexOf('\\' + command_name, pos);
-        if (pos === -1) {
-            return -1;
+        const firstChar = latex[pos];
+        let token: Token;
+        switch (firstChar) {
+            case '%': {
+                let newPos = pos + 1;
+                while (newPos < latex.length && latex[newPos] !== '\n') {
+                    newPos += 1;
+                }
+                token = { type: 'comment', value: latex.slice(pos + 1, newPos) };
+                pos = newPos;
+                break;
+            }
+            case '{':
+            case '}':
+            case '_':
+            case '^':
+            case '&':
+                token = { type: 'control', value: firstChar};
+                pos++;
+                break;
+            case '\n':
+                token = { type: 'newline', value: firstChar};
+                pos++;
+                break;
+            case '\r': {
+                if (pos + 1 < latex.length && latex[pos + 1] === '\n') {
+                    token = { type: 'newline', value: '\n' };
+                    pos += 2;
+                } else {
+                    token = { type: 'newline', value: '\n' };
+                    pos ++;
+                }
+                break;
+            }
+            case ' ': {
+                let newPos = pos;
+                while (newPos < latex.length && latex[newPos] === ' ') {
+                    newPos += 1;
+                }
+                token = {type: 'whitespace', value: latex.slice(pos, newPos)};
+                pos = newPos;
+                break;
+            }
+            case '\\': {
+                if (pos + 1 >= latex.length) {
+                    throw new LatexParserError('Expecting command name after \\');
+                }
+                const firstTwoChars = latex.slice(pos, pos + 2);
+                if (firstTwoChars === '\\\\') {
+                    token = { type: 'control', value: '\\\\' };
+                    pos += 2;
+                } else if (['\\{','\\}', '\\%', '\\$', '\\&', '\\#', '\\_'].includes(firstTwoChars)) {
+                    token = { type: 'element', value: firstTwoChars };
+                    pos += 2;
+                } else {
+                    const command = eat_command_name(latex, pos + 1);
+                    token = { type: 'command', value: '\\' + command};
+                    pos += 1 + command.length;
+                }
+                break;
+            }
+            default: {
+                if (isdigit(firstChar)) {
+                    let newPos = pos;
+                    while (newPos < latex.length && isdigit(latex[newPos])) {
+                        newPos += 1;
+                    }
+                    token = { type: 'element', value: latex.slice(pos, newPos) }
+                } else if (isalpha(firstChar)) {
+                    token = { type: 'element', value: firstChar };
+                } else if ('+-*/=\'<>!.,;?()[]|'.includes(firstChar)) {
+                    token = { type: 'element', value: firstChar }
+                } else {
+                    token = { type: 'unknown', value: firstChar };
+                }
+                pos += token.value.length;
+            }
         }
-        if (pos + len_slash_command >= latex.length || !isalpha(latex[pos + len_slash_command])) {
-            return pos;
-        } else {
-            pos += len_slash_command;
+
+        tokens.push(token);
+
+        if (token.type === 'command' && ['\\text', '\\begin', '\\end'].includes(token.value)) {
+            if (pos >= latex.length || latex[pos] !== '{') {
+                throw new LatexParserError(`No content for ${token.value} command`);
+            }
+            tokens.push({ type: 'control', value: '{' });
+            const posClosingBracket = find_closing_curly_bracket_char(latex, pos);
+            pos++;
+            let textInside = latex.slice(pos, posClosingBracket);
+            // replace all escape characters with their actual characters
+            const chars = ['{', '}', '\\', '$', '&', '#', '_', '%'];
+            for (const char of chars) {
+                textInside = textInside.replaceAll('\\' + char, char);
+            }
+            tokens.push({ type: 'text', value: textInside });
+            tokens.push({ type: 'control', value: '}' });
+            pos = posClosingBracket + 1;
         }
     }
-
-    return -1;
+    return tokens;
 }
 
-function find_closing_right_command(latex: string, start: number): number {
-    let count = 1;
-    let pos = start;
-
-    while (count > 0) {
-        if (pos >= latex.length) {
-            return -1;
-        }
-        const left_idx = find_command(latex, pos, 'left');
-        const right_idx = find_command(latex, pos, 'right');
-
-        if (right_idx === -1) {
-            return -1;
-        }
-
-        if (left_idx === -1 || left_idx > right_idx) {
-            // a \right is ahead
-            count -= 1;
-            pos = right_idx + '\\right'.length;
-        } else {
-            // a \left is ahead
-            count += 1;
-            pos = left_idx + '\\left'.length;
-        }
-    }
-
-    return pos - '\\right'.length;
-}
-
-function find_closing_end_command(latex: string, start: number): number {
-    let count = 1;
-    let pos = start;
-
-    while (count > 0) {
-        if (pos >= latex.length) {
-            return -1;
-        }
-        const begin_idx = find_command(latex, pos, 'begin');
-        const end_idx = find_command(latex, pos, 'end');
-
-        if (end_idx === -1) {
-            return -1;
-        }
-
-        if (begin_idx === -1 || begin_idx > end_idx) {
-            // an \end is ahead
-            count -= 1;
-            pos = end_idx + '\\end'.length;
-        } else {
-            // a \begin is ahead
-            count += 1;
-            pos = begin_idx + '\\begin'.length;
-        }
-    }
-
-    return pos - '\\end'.length;
-}
-
-function eat_whitespaces(latex: string, start: number): string {
-    let pos = start;
-    while (pos < latex.length && [' ', '\t', '\n'].includes(latex[pos])) {
-        pos += 1;
-    }
-    return latex.substring(start, pos);
-}
-
-function eat_spaces(latex: string, start: number): string {
-    let pos = start;
-    while (pos < latex.length && latex[pos] === ' ') {
-        pos += 1;
-    }
-    return latex.substring(start, pos);
-}
-
-function eat_command_name(latex: string, start: number): string {
-    let pos = start;
-    while (pos < latex.length && isalpha(latex[pos])) {
-        pos += 1;
-    }
-    return latex.substring(start, pos);
-}
-
-function eat_parenthesis(latex: string, start: number): string | null {
-    if ('()[]|'.includes(latex[start])) {
-        return latex[start];
-    } else if (start + 1 < latex.length && ['\\{', '\\}'].includes(latex.substring(start, start + 2))) {
-        return latex.substring(start, start + 2);
-    } else if (start + 6 < latex.length && ['\\lfloor', '\\rfloor'].includes(latex.substring(start, start + 7))) {
-        return latex.substring(start, start + 7);
-    } else if (start + 5 < latex.length && ['\\lceil', '\\rceil'].includes(latex.substring(start, start + 6))) {
-        return latex.substring(start, start + 6);
-    } else if (start + 6 < latex.length && ['\\langle', '\\rangle'].includes(latex.substring(start, start + 7))) {
-        return latex.substring(start, start + 7);
-    } else {
-        return null;
-    }
-}
-
-function eat_primes(latex: string, start: number): number {
-    let pos = start;
-    while (pos < latex.length && latex[pos] === "'") {
-        pos += 1;
-    }
-    return pos - start;
+function token_eq(token1: Token, token2: Token) {
+    return token1.type == token2.type && token1.value == token2.value;
 }
 
 
@@ -262,6 +364,9 @@ export class LatexParserError extends Error {
 
 type ParseResult = [TexNode, number];
 
+const SUB_SYMBOL:Token = { type: 'control', value: '_' };
+const SUP_SYMBOL:Token = { type: 'control', value: '^' };
+
 export class LatexParser {
     space_sensitive: boolean;
     newline_sensitive: boolean;
@@ -271,24 +376,37 @@ export class LatexParser {
         this.newline_sensitive = newline_sensitive;
     }
 
-    parse(latex: string): TexNode {
+    parse(tokens: Token[]): TexNode {
         const results: TexNode[] = [];
         let pos = 0;
-
-        while (pos < latex.length) {
-            const [res, newPos] = this.parseNextExpr(latex, pos);
-            pos = newPos;
-            if (!this.space_sensitive && res.type === 'whitespace') {
-                continue;
+        while (pos < tokens.length) {
+            const results: TexNode[] = [];
+            let pos = 0;
+    
+            while (pos < tokens.length) {
+                const [res, newPos] = this.parseNextExpr(tokens, pos);
+                pos = newPos;
+                if (!this.space_sensitive && res.type === 'whitespace') {
+                    continue;
+                }
+                if (!this.newline_sensitive && res.type === 'newline') {
+                    continue;
+                }
+                if (res.type === 'control' && res.content === '&') {
+                    throw new LatexParserError('Unexpected & outside of an alignment');
+                }
+                results.push(res);
             }
-            if (!this.newline_sensitive && res.type === 'newline') {
-                continue;
+    
+            if (results.length === 0) {
+                return EMPTY_NODE;
+            } else if (results.length === 1) {
+                return results[0];
+            } else {
+                return { type: 'ordgroup', content: '', args: results };
             }
-            if (res.type === 'control' && res.content === '&') {
-                throw new LatexParserError('Unexpected & outside of an alignment');
-            }
-            results.push(res);
         }
+
 
         if (results.length === 0) {
             return EMPTY_NODE;
@@ -299,32 +417,32 @@ export class LatexParser {
         }
     }
 
-    parseNextExpr(latex: string, start: number): ParseResult {
-        let [base, pos] = this.parseNextExprWithoutSupSub(latex, start);
+    parseNextExpr(tokens: Token[], start: number): ParseResult {
+        let [base, pos] = this.parseNextExprWithoutSupSub(tokens, start);
         let sub: TexNode | null = null;
         let sup: TexNode | null = null;
         let num_prime = 0;
 
-        num_prime += eat_primes(latex, pos);
+        num_prime += eat_primes(tokens, pos);
         pos += num_prime;
-        if (pos < latex.length && latex[pos] === '_') {
-            [sub, pos] = this.parseNextExprWithoutSupSub(latex, pos + 1);
-            num_prime += eat_primes(latex, pos);
+        if (pos < tokens.length && token_eq(tokens[pos], SUB_SYMBOL)) {
+            [sub, pos] = this.parseNextExprWithoutSupSub(tokens, pos + 1);
+            num_prime += eat_primes(tokens, pos);
             pos += num_prime;
-            if (pos < latex.length && latex[pos] === '^') {
-                [sup, pos] = this.parseNextExprWithoutSupSub(latex, pos + 1);
-                if (eat_primes(latex, pos) > 0) {
+            if (pos < tokens.length && token_eq(tokens[pos], SUP_SYMBOL)) {
+                [sup, pos] = this.parseNextExprWithoutSupSub(tokens, pos + 1);
+                if (eat_primes(tokens, pos) > 0) {
                     throw new LatexParserError('Double superscript');
                 }
             }
-        } else if (pos < latex.length && latex[pos] === '^') {
-            [sup, pos] = this.parseNextExprWithoutSupSub(latex, pos + 1);
-            if (eat_primes(latex, pos) > 0) {
+        } else if (pos < tokens.length && token_eq(tokens[pos], SUP_SYMBOL)) {
+            [sup, pos] = this.parseNextExprWithoutSupSub(tokens, pos + 1);
+            if (eat_primes(tokens, pos) > 0) {
                 throw new LatexParserError('Double superscript');
             }
-            if (pos < latex.length && latex[pos] === '_') {
-                [sub, pos] = this.parseNextExprWithoutSupSub(latex, pos + 1);
-                if (eat_primes(latex, pos) > 0) {
+            if (pos < tokens.length && token_eq(tokens[pos], SUB_SYMBOL)) {
+                [sub, pos] = this.parseNextExprWithoutSupSub(tokens, pos + 1);
+                if (eat_primes(tokens, pos) > 0) {
                     throw new LatexParserError('Double superscript');
                 }
             }
@@ -355,193 +473,191 @@ export class LatexParser {
         }
     }
 
-    parseNextExprWithoutSupSub(latex: string, start: number): ParseResult {
-        const firstChar = latex[start];
-        if (firstChar === '{') {
-            const posClosingBracket = find_closing_curly_bracket(latex, start);
-            const exprInside = latex.slice(start + 1, posClosingBracket);
-            return [this.parse(exprInside), posClosingBracket + 1];
-        } else if (firstChar === '\\') {
-            if (start + 1 >= latex.length) {
-                throw new LatexParserError('Expecting command name after \\');
-            }
-            const firstTwoChars = latex.slice(start, start + 2);
-            if (firstTwoChars === '\\\\') {
-                return [{ type: 'control', content: '\\\\' }, start + 2];
-            } else if (firstTwoChars === '\\{' || firstTwoChars === '\\}') {
-                return [{ type: 'token', content: firstTwoChars }, start + 2];
-            } else if (['\\%', '\\$', '\\&', '\\#', '\\_'].includes(firstTwoChars)) {
-                return [{ type: 'token', content: firstTwoChars }, start + 2];
-            } else if (latex.slice(start).startsWith('\\begin{')) {
-                return this.parseBeginEndExpr(latex, start);
-            } else if (latex.slice(start).startsWith('\\left') && (start + 5 >= latex.length || !isalpha(latex[start + 5]))) {
-                return this.parseLeftRightExpr(latex, start);
-            } else {
-                return this.parseCommandExpr(latex, start);
-            }
-        } else if (firstChar === '%') {
-            let pos = start + 1;
-            while (pos < latex.length && latex[pos] !== '\n') {
-                pos += 1;
-            }
-            return [{ type: 'comment', content: latex.slice(start + 1, pos) }, pos];
-        } else if (isdigit(firstChar)) {
-            let pos = start;
-            while (pos < latex.length && isdigit(latex[pos])) {
-                pos += 1;
-            }
-            return [{ type: 'token', content: latex.slice(start, pos) }, pos];
-        } else if (isalpha(firstChar)) {
-            return [{ type: 'token', content: firstChar }, start + 1];
-        } else if ('+-*/=<>!'.includes(firstChar)) {
-            return [{ type: 'token', content: firstChar }, start + 1];
-        } else if ('.,;?'.includes(firstChar)) {
-            return [{ type: 'atom', content: firstChar }, start + 1];
-        } else if ('()[]'.includes(firstChar)) {
-            return [{ type: 'token', content: firstChar }, start + 1];
-        } else if (firstChar === '_') {
-            let [sub, pos] = this.parseNextExpr(latex, start + 1);
-            let sup: TexNode | undefined = undefined;
-            if (pos < latex.length && latex[pos] === '^') {
-                [sup, pos] = this.parseNextExpr(latex, pos + 1);
-            }
-            const data = { base: EMPTY_NODE, sub, sup };
-            return [{ type: 'supsub', content: '', data: data }, pos];
-        } else if (firstChar === '^') {
-            let [sup, pos] = this.parseNextExpr(latex, start + 1);
-            let sub: TexNode | undefined = undefined;
-            if (pos < latex.length && latex[pos] === '_') {
-                [sub, pos] = this.parseNextExpr(latex, pos + 1);
-            }
-            const data = { base: EMPTY_NODE, sub, sup };
-            return [{ type: 'supsub', content: '', data: data }, pos];
-        } else if (firstChar === ' ') {
-            let pos = start;
-            while (pos < latex.length && latex[pos] === ' ') {
-                pos += 1;
-            }
-            return [{ type: 'whitespace', content: latex.slice(start, pos) }, pos];
-        } else if (firstChar === '\n') {
-            return [{ type: 'newline', content: '\n' }, start + 1];
-        } else if (firstChar === '\r') {
-            if (start + 1 < latex.length && latex[start + 1] === '\n') {
-                return [{ type: 'newline', content: '\n' }, start + 2];
-            } else {
-                return [{ type: 'newline', content: '\n' }, start + 1];
-            }
-        } else if (firstChar === '&') {
-            return [{ type: 'control', content: '&' }, start + 1];
-        } else {
-            return [{ type: 'unknown', content: firstChar }, start + 1];
+    parseNextExprWithoutSupSub(tokens: Token[], start: number): ParseResult {
+        const firstToken = tokens[start];
+        const tokenType = firstToken.type;
+        switch (tokenType) {
+            case 'element':
+            case 'text':
+            case 'comment':
+            case 'whitespace':
+            case 'newline':
+                return [{ type: tokenType, content: firstToken.value }, start + 1];
+            case 'command':
+                if (token_eq(firstToken, BEGIN_COMMAND)) {
+                    return this.parseBeginEndExpr(tokens, start);
+                } else if (token_eq(firstToken, LEFT_COMMAND)) {
+                    return this.parseLeftRightExpr(tokens, start);
+                } else {
+                    return this.parseCommandExpr(tokens, start);
+                }
+            case 'control':
+                const controlChar = firstToken.value;
+                switch (controlChar) {
+                    case '{':
+                        const posClosingBracket = find_closing_curly_bracket(tokens, start);
+                        const exprInside = tokens.slice(start + 1, posClosingBracket);
+                        return [this.parse(exprInside), posClosingBracket + 1];
+                    case '}':
+                        throw new LatexParserError("Unmatched '}'");
+                    case '\\\\':
+                        return [{ type: 'control', content: '\\\\' }, start + 1];
+                    case '_': {
+                        let [sub, pos] = this.parseNextExpr(tokens, start + 1);
+                        let sup: TexNode | undefined = undefined;
+                        if (pos < tokens.length && token_eq(tokens[pos], SUP_SYMBOL)) {
+                            [sup, pos] = this.parseNextExpr(tokens, pos + 1);
+                        }
+                        const subData = { base: EMPTY_NODE, sub, sup };
+                        return [{ type: 'supsub', content: '', data: subData }, pos];
+                    }
+                    case '^': {
+                        let [sup, pos] = this.parseNextExpr(tokens, start + 1);
+                        let sub: TexNode | undefined = undefined;
+                        if (pos < tokens.length && token_eq(tokens[pos], SUB_SYMBOL)) {
+                            [sub, pos] = this.parseNextExpr(tokens, pos + 1);
+                        }
+                        const supData = { base: EMPTY_NODE, sub, sup };
+                        return [{ type: 'supsub', content: '', data: supData }, pos];
+                    }
+                    case '&':
+                        return [{ type: 'control', content: '&' }, start + 1];
+                    default:
+                        throw new LatexParserError('Unknown control sequence');
+                }
+            default:
+                throw new LatexParserError('Unknown token type');
         }
     }
 
-    parseCommandExpr(latex: string, start: number): ParseResult {
-        assert(latex[start] === '\\');
+    parseCommandExpr(tokens: Token[], start: number): ParseResult {
+        assert(tokens[start].type === 'command');
+
+        const command = tokens[start].value; // command name starts with a \
+
         let pos = start + 1;
-        const command = eat_command_name(latex, pos);
-        pos += command.length;
-        const paramNum = get_command_param_num(command);
+
+        if (['left', 'right', 'begin', 'end'].includes(command.slice(1))) {
+            throw new LatexParserError('Unexpected command: ' + command);
+        } 
+
+        const paramNum = get_command_param_num(command.slice(1));
         if (paramNum === 0) {
-            return [{ type: 'symbol', content: '\\' + command }, pos];
+            return [{ type: 'symbol', content: command }, pos];
         } else if (paramNum === 1) {
-            if (command === 'sqrt' && pos < latex.length && latex[pos] === '[') {
+            if (command === '\\sqrt' && pos < tokens.length && token_eq(tokens[pos], LEFT_SQUARE_BRACKET)) {
                 const posLeftSquareBracket = pos;
-                const posRightSquareBracket = find_closing_square_bracket(latex, pos);
-                const exprInside = latex.slice(posLeftSquareBracket + 1, posRightSquareBracket);
+                const posRightSquareBracket = find_closing_square_bracket(tokens, pos);
+                const exprInside = tokens.slice(posLeftSquareBracket + 1, posRightSquareBracket);
                 const exponent = this.parse(exprInside);
-                const [arg1, newPos] = this.parseNextExprWithoutSupSub(latex, posRightSquareBracket + 1);
-                return [{ type: 'unaryFunc', content: '\\' + command, args: [arg1], data: exponent }, newPos];
-            } else if (command === 'text') {
-                assert(latex[pos] === '{');
-                const posClosingBracket = find_closing_curly_bracket(latex, pos);
-                const text = latex.slice(pos + 1, posClosingBracket);
-                return [{ type: 'text', content: text }, posClosingBracket + 1];
-            } else {
-                let [arg1, newPos] = this.parseNextExprWithoutSupSub(latex, pos);
-                return [{ type: 'unaryFunc', content: '\\' + command, args: [arg1] }, newPos];
+                const [arg1, newPos] = this.parseNextExprWithoutSupSub(tokens, posRightSquareBracket + 1);
+                return [{ type: 'unaryFunc', content: command, args: [arg1], data: exponent }, newPos];
+            } else if (command === '\\text') {
+                if (pos + 2 >= tokens.length) {
+                    throw new LatexParserError('Expecting content for \\text command');
+                }
+                assert(token_eq(tokens[pos], LEFT_CURLY_BRACKET));
+                assert(tokens[pos + 1].type === 'text');
+                assert(token_eq(tokens[pos + 2], RIGHT_CURLY_BRACKET));
+                const text = tokens[pos + 1].value;
+                return [{ type: 'text', content: text }, pos + 3];
             }
+            let [arg1, newPos] = this.parseNextExprWithoutSupSub(tokens, pos);
+            return [{ type: 'unaryFunc', content: command, args: [arg1] }, newPos];
         } else if (paramNum === 2) {
-            const [arg1, pos1] = this.parseNextExprWithoutSupSub(latex, pos);
-            const [arg2, pos2] = this.parseNextExprWithoutSupSub(latex, pos1);
-            return [{ type: 'binaryFunc', content: '\\' + command, args: [arg1, arg2] }, pos2];
+            const [arg1, pos1] = this.parseNextExprWithoutSupSub(tokens, pos);
+            const [arg2, pos2] = this.parseNextExprWithoutSupSub(tokens, pos1);
+            return [{ type: 'binaryFunc', content: command, args: [arg1, arg2] }, pos2];
         } else {
             throw new Error( 'Invalid number of parameters');
         }
     }
 
-    parseLeftRightExpr(latex: string, start: number): ParseResult {
-        assert(latex.slice(start, start + 5) === '\\left');
-        let pos = start + '\\left'.length;
-        pos += eat_whitespaces(latex, pos).length;
-        if (pos >= latex.length) {
+    parseLeftRightExpr(tokens: Token[], start: number): ParseResult {
+        assert(token_eq(tokens[start], LEFT_COMMAND));
+
+        let pos = start + 1;
+        pos += eat_whitespaces(tokens, pos).length;
+
+        if (pos >= tokens.length) {
             throw new LatexParserError('Expecting delimiter after \\left');
         }
-        const leftDelimiter = eat_parenthesis(latex, pos);
+
+        const leftDelimiter = eat_parenthesis(tokens, pos);
         if (leftDelimiter === null) {
             throw new LatexParserError('Invalid delimiter after \\left');
         }
-        pos += leftDelimiter.length;
+        pos++;
         const exprInsideStart = pos;
-        const idx = find_closing_right_command(latex, pos);
+        const idx = find_closing_right_command(tokens, pos);
         if (idx === -1) {
             throw new LatexParserError('No matching \\right');
         }
         const exprInsideEnd = idx;
-        pos = idx + '\\right'.length;
-        pos += eat_whitespaces(latex, pos).length;
-        if (pos >= latex.length) {
-            throw new LatexParserError('Expecting delimiter after \\right');
+        pos = idx + 1;
+
+        pos += eat_whitespaces(tokens, pos).length;
+        if (pos >= tokens.length) {
+            throw new LatexParserError('Expecting \\right after \\left');
         }
-        const rightDelimiter = eat_parenthesis(latex, pos);
+        
+        const rightDelimiter = eat_parenthesis(tokens, pos);
         if (rightDelimiter === null) {
             throw new LatexParserError('Invalid delimiter after \\right');
         }
-        pos += rightDelimiter.length;
-        const exprInside = latex.slice(exprInsideStart, exprInsideEnd);
+        pos++;
+
+        const exprInside = tokens.slice(exprInsideStart, exprInsideEnd);
         const body = this.parse(exprInside);
         const args = [
-            { type: 'token', content: leftDelimiter },
+            { type: 'element', content: leftDelimiter.value },
             body,
-            { type: 'token', content: rightDelimiter }
+            { type: 'element', content: rightDelimiter.value }
         ]
         const res = { type: 'leftright', content: '', args: args };
         return [res, pos];
     }
 
+    parseBeginEndExpr(tokens: Token[], start: number): ParseResult {
+        assert(token_eq(tokens[start], BEGIN_COMMAND));
 
-    parseBeginEndExpr(latex: string, start: number): ParseResult {
-        assert(latex.slice(start, start + 7) === '\\begin{');
-        let pos = start + '\\begin'.length;
-        const idx = find_closing_curly_bracket(latex, pos);
-        if (idx === -1) {
-            throw new LatexParserError('No matching } after \\begin{');
-        }
-        const envName = latex.slice(pos + 1, idx);
-        pos = idx + 1;
-        pos += eat_whitespaces(latex, pos).length; // ignore whitespaces and '\n' after \begin{envName}
+        let pos = start + 1;
+        assert(token_eq(tokens[pos], LEFT_CURLY_BRACKET));
+        assert(tokens[pos + 1].type === 'text');
+        assert(token_eq(tokens[pos + 2], RIGHT_CURLY_BRACKET));
+        const envName = tokens[pos + 1].value;
+        pos += 3;
+        
+        pos += eat_whitespaces(tokens, pos).length; // ignore whitespaces and '\n' after \begin{envName}
+        
         const exprInsideStart = pos;
-        const endIdx = find_closing_end_command(latex, pos);
+
+        const endIdx = find_closing_end_command(tokens, pos);
         if (endIdx === -1) {
             throw new LatexParserError('No matching \\end');
         }
         const exprInsideEnd = endIdx;
-        pos = endIdx + '\\end'.length;
-        const closingIdx = find_closing_curly_bracket(latex, pos);
-        if (closingIdx === -1) {
-            throw new LatexParserError('No matching } after \\end{');
-        }
-        if (latex.slice(pos + 1, closingIdx) !== envName) {
+        pos = endIdx + 1;
+        
+        assert(token_eq(tokens[pos], LEFT_CURLY_BRACKET));
+        assert(tokens[pos + 1].type === 'text');
+        assert(token_eq(tokens[pos + 2], RIGHT_CURLY_BRACKET));
+        if (tokens[pos + 1].value !== envName) {
             throw new LatexParserError('Mismatched \\begin and \\end environments');
         }
-        let exprInside = latex.slice(exprInsideStart, exprInsideEnd);
-        exprInside = exprInside.trimEnd(); // ignore whitespaces and '\n' before \end{envName}
+        pos += 3;
+    
+        const exprInside = tokens.slice(exprInsideStart, exprInsideEnd);
+        // ignore whitespaces and '\n' before \end{envName}
+        while(exprInside.length > 0 && ['whitespace', 'newline'].includes(exprInside[exprInside.length - 1].type)) {
+            exprInside.pop();
+        }
         const body = this.parseAligned(exprInside);
         const res = { type: 'beginend', content: envName, data: body };
-        return [res, closingIdx + 1];
+        return [res, pos];
     }
 
-    parseAligned(latex: string): TexNode[][] {
+    parseAligned(tokens: Token[]): TexNode[][] {
         let pos = 0;
         const allRows: TexNode[][] = [];
         let row: TexNode[] = [];
@@ -549,8 +665,8 @@ export class LatexParser {
         let group: TexNode = { type: 'ordgroup', content: '', args: [] };
         row.push(group);
 
-        while (pos < latex.length) {
-            const [res, newPos] = this.parseNextExpr(latex, pos);
+        while (pos < tokens.length) {
+            const [res, newPos] = this.parseNextExpr(tokens, pos);
             pos = newPos;
             if (res.type === 'whitespace') {
                 continue;
@@ -568,16 +684,15 @@ export class LatexParser {
                 group.args!.push(res);
             }
         }
-
         return allRows;
     }
 }
-
 
 export function parseTex(tex: string, customTexMacros: {[key: string]: string}): TexNode {
     const parser = new LatexParser();
     for (const [macro, replacement] of Object.entries(customTexMacros)) {
         tex = tex.replaceAll(macro, replacement);
     }
-    return parser.parse(tex) as TexNode;
+    const tokens = tokenize(tex);
+    return parser.parse(tokens) as TexNode;
 }

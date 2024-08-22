@@ -20,7 +20,7 @@ export interface TexNode {
 }
 
 export interface TypstNode {
-    type: 'atom' | 'token' | 'symbol' | 'text' | 'softSpace' | 'comment' | 'newline',
+    type: 'atom' | 'symbol' | 'text' | 'softSpace' | 'comment' | 'newline',
     content: string;
     args?: TypstNode[];
 }
