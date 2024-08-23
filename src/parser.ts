@@ -690,9 +690,15 @@ export class LatexParser {
 
 export function parseTex(tex: string, customTexMacros: {[key: string]: string}): TexNode {
     const parser = new LatexParser();
-    for (const [macro, replacement] of Object.entries(customTexMacros)) {
-        tex = tex.replaceAll(macro, replacement);
+    const original_tokens = tokenize(tex);
+    let processed_tokens: Token[] = [];
+    for (const token of original_tokens) {
+        if (token.type === 'command' && customTexMacros[token.value]) {
+            const expanded_tokens = tokenize(customTexMacros[token.value]);
+            processed_tokens = processed_tokens.concat(expanded_tokens);
+        } else {
+            processed_tokens.push(token);
+        }
     }
-    const tokens = tokenize(tex);
-    return parser.parse(tokens) as TexNode;
+    return parser.parse(processed_tokens);
 }
