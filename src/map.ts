@@ -1,5 +1,4 @@
 export const symbolMap = new Map<string, string>([
-    ['gets', 'arrow.l'],
     ['nonumber', ''],
     ['vec', 'arrow'],
     ['neq', 'eq.not'],
@@ -25,14 +24,15 @@ export const symbolMap = new Map<string, string>([
     ['tfrac', 'frac'],
 
     ['boldsymbol', 'bold'],
-    ['mathbf', 'bold'],
     ['mathbb', 'bb'],
+    ['mathbf', 'bold'],
     ['mathcal', 'cal'],
+    ['mathit', 'italic'],
     ['mathfrak', 'frak'],
+    ['mathrm', 'upright'],
     ['mathsf', 'sans'],
     ['mathtt', 'mono'],
 
-    ['mathrm', 'upright'],
     ['rm', 'upright'],
 
     // TODO: \pmb need special logic to handle but it is not implemented now. See the commented test case.
@@ -58,18 +58,6 @@ export const symbolMap = new Map<string, string>([
     ['equiv', 'equiv'],
     ['propto', 'prop'],
 
-    /* arrows used in proofs */
-    // tex: \implies \iff \leftrightarrow \longleftrightarrow \rightrightarrows
-    // typst: arrow.r.double.long arrow.l.r.double.long arrow.l.r arrow.l.r.long arrows.rr
-    ['implies', 'arrow.r.double.long'],
-    ['Longrightarrow', 'arrow.r.double.long'], // Note: This macro is not supported by KaTeX
-    ['iff', 'arrow.l.r.double.long'],
-    ['Longleftrightarrow', 'arrow.l.r.double.long'], // Note: This macro is not supported by KaTeX
-    ['leftrightarrow', 'arrow.l.r'],
-    ['longleftrightarrow', 'arrow.l.r.long'],
-    ['rightrightarrows', 'arrows.rr'],
-
-
     /* left and right floor,ceil */
     // tex: \lfloor \rfloor \lceil \rceil
     // typst: ⌊ ⌋ ⌈ ⌉ 
@@ -80,6 +68,39 @@ export const symbolMap = new Map<string, string>([
     ['lceil', '⌈'],
     ['rceil', '⌉'],
 
+    /* arrows */
+    ['gets', 'arrow.l'],
+    ['hookleftarrow', 'arrow.l.hook'],
+    ['leftharpoonup', 'harpoon.lt'],
+    ['leftharpoondown', 'harpoon.lb'],
+    ['rightleftharpoons', 'harpoons.rtlb'],
+    ['longleftarrow', 'arrow.l.long'],
+    ['longrightarrow', 'arrow.r.long'],
+    ['longleftrightarrow', 'arrow.l.r.long'],
+    ['Longleftarrow', 'arrow.l.double.long'],
+    ['Longrightarrow', 'arrow.r.double.long'],
+    ['Longleftrightarrow', 'arrow.l.r.double.long'],
+    ['longmapsto', 'arrow.r.bar'],
+    ['hookrightarrow', 'arrow.r.hook'],
+    ['rightharpoonup', 'harpoon.rt'],
+    ['rightharpoondown', 'harpoon.rb'],
+    ['iff', 'arrow.l.r.double.long'],
+    ['implies', 'arrow.r.double.long'],
+    ['uparrow', 'arrow.t'],
+    ['downarrow', 'arrow.b'],
+    ['updownarrow', 'arrow.t.b'],
+    ['Uparrow', 'arrow.t.double'],
+    ['Downarrow', 'arrow.b.double'],
+    ['Updownarrow', 'arrow.t.b.double'],
+    ['nearrow', 'arrow.tr'],
+    ['searrow', 'arrow.br'],
+    ['swarrow', 'arrow.bl'],
+    ['nwarrow', 'arrow.tl'],
+    ['leadsto', 'arrow.squiggly'],
+
+    ['leftleftarrows', 'arrows.ll'],
+    ['rightrightarrows', 'arrows.rr'],
+
 
     ['Cap', 'sect.double'], 
     ['Cup', 'union.double'], 
@@ -87,12 +108,16 @@ export const symbolMap = new Map<string, string>([
     ['Gamma', 'Gamma'], 
     ['Join', 'join'], 
     ['Lambda', 'Lambda'], 
+    ['Leftarrow', 'arrow.l.double'],
+    ['Leftrightarrow', 'arrow.l.r.double'],
     ['Longrightarrow', 'arrow.r.double.long'], 
     ['Omega', 'Omega'], 
+    ['P', 'pilcrow'], 
     ['Phi', 'Phi'], 
     ['Pi', 'Pi'], 
     ['Psi', 'Psi'], 
-    ['Rightarrow', 'arrow.double'], 
+    ['Rightarrow', 'arrow.r.double'], 
+    ['S', 'section'], 
     ['Sigma', 'Sigma'], 
     ['Theta', 'Theta'], 
     ['aleph', 'alef'], 
@@ -126,6 +151,7 @@ export const symbolMap = new Map<string, string>([
     ['colon', 'colon'], 
     ['cong', 'tilde.equiv'], 
     ['coprod', 'product.co'], 
+    ['copyright', 'copyright'], 
     ['cup', 'union'], 
     ['curlyvee', 'or.curly'], 
     ['curlywedge', 'and.curly'], 
@@ -179,7 +205,7 @@ export const symbolMap = new Map<string, string>([
     ['leqslant', 'lt.eq.slant'], 
     ['lhd', 'triangle.l'], 
     ['ll', 'lt.double'], 
-    ['longmapsto', 'arrow.long.bar'], 
+    ['longmapsto', 'arrow.bar.long'], 
     ['longrightarrow', 'arrow.long'], 
     ['lor', 'or'],
     ['ltimes', 'times.l'], 

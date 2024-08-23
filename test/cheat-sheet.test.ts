@@ -2,7 +2,7 @@ import path from 'path';
 import toml from 'toml';
 import fs from 'node:fs';
 import { describe, it, test, expect } from 'vitest';
-import { tex2typst } from '../src';
+import { tex2typst, symbolMap } from '../src';
 
 interface CheatSheet {
     math_commands: { [key: string]: string };
@@ -38,6 +38,7 @@ describe('cheat sheet', () => {
             const expected = value;
             const result = tex2typst(input);
             expect(result).toBe(expected);
+            expect(symbolMap.get(key)).toBe(expected);
         }
     });
 });

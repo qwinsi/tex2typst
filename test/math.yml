@@ -294,3 +294,9 @@ cases:
       c + d
       e + f // co
       g + h
+  - title: mod
+    tex: a^{p-1} \equiv 1 \mod{p}
+    typst: a^(p - 1) equiv 1 mod p
+  - title: thin space
+    tex: a \, b
+    typst: a thin b

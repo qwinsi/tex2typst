@@ -1,6 +1,7 @@
 import { parseTex } from "./parser";
 import { Tex2TypstOptions } from "./types";
 import { TypstWriter } from "./writer";
+import { symbolMap } from "./map";
 
 
 export function tex2typst(tex: string, options?: Tex2TypstOptions): string {
@@ -26,4 +27,4 @@ export function tex2typst(tex: string, options?: Tex2TypstOptions): string {
     return writer.finalize();
 }
 
-export { Tex2TypstOptions };
+export { symbolMap, Tex2TypstOptions };

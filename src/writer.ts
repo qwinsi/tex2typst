@@ -283,6 +283,8 @@ export class TypstWriter {
         } else if (node.type === 'control') {
             if (node.content === '\\\\') {
                 this.queue.push({ type: 'symbol', content: node.content });
+            } else if (node.content === '\\,') {
+                this.queue.push({ type: 'symbol', content: 'thin' });
             } else {
                 throw new TypstWriterError(`Unknown control sequence: ${node.content}`, node);
             }

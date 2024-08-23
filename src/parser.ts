@@ -5,36 +5,25 @@ const UNARY_COMMANDS = [
     'sqrt',
     'text',
 
-    'arccos',
-    'arcsin',
-    'arctan',
-    'arg',
     'bar',
     'bold',
     'boldsymbol',
     'ddot',
-    'det',
-    'dim',
     'dot',
-    'exp',
-    'gcd',
     'hat',
-    'ker',
     'mathbb',
     'mathbf',
     'mathcal',
+    'mathfrak',
+    'mathit',
+    'mathrm',
     'mathscr',
     'mathsf',
     'mathtt',
-    'mathrm',
-    'max',
-    'min',
-    'mod',
     'operatorname',
     'overbrace',
     'overline',
     'pmb',
-    'sup',
     'rm',
     'tilde',
     'underbrace',
@@ -295,17 +284,15 @@ function tokenize(latex: string): Token[] {
                     throw new LatexParserError('Expecting command name after \\');
                 }
                 const firstTwoChars = latex.slice(pos, pos + 2);
-                if (firstTwoChars === '\\\\') {
-                    token = { type: 'control', value: '\\\\' };
-                    pos += 2;
+                if (['\\\\', '\\,'].includes(firstTwoChars)) {
+                    token = { type: 'control', value: firstTwoChars };
                 } else if (['\\{','\\}', '\\%', '\\$', '\\&', '\\#', '\\_'].includes(firstTwoChars)) {
                     token = { type: 'element', value: firstTwoChars };
-                    pos += 2;
                 } else {
                     const command = eat_command_name(latex, pos + 1);
                     token = { type: 'command', value: '\\' + command};
-                    pos += 1 + command.length;
                 }
+                pos += token.value.length;
                 break;
             }
             default: {
@@ -502,6 +489,8 @@ export class LatexParser {
                         throw new LatexParserError("Unmatched '}'");
                     case '\\\\':
                         return [{ type: 'control', content: '\\\\' }, start + 1];
+                    case '\\,':
+                        return [{ type: 'control', content: '\\,' }, start + 1];
                     case '_': {
                         let [sub, pos] = this.parseNextExpr(tokens, start + 1);
                         let sup: TexNode | undefined = undefined;
