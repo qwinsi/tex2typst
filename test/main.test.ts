@@ -2,7 +2,7 @@ import { describe, it, test, expect } from 'vitest';
 import yaml from 'js-yaml';
 import path from 'node:path';
 import fs from 'node:fs';
-import { parseTex, LatexParserError } from '../src/parser';
+import { parseTex, LatexParserError, Token, tokenize } from '../src/parser';
 import { tex2typst } from '../src/index';
 import { TypstWriterError } from '../src/writer';
 import { Tex2TypstOptions, TexNode } from '../src/types';
@@ -34,6 +34,7 @@ caseFiles.forEach(({ title, cases }) => {
     cases.forEach((c: TestCase) => {
       test(c.title, function() {
         const {tex, typst} = c;
+        let tokens: null | Token[] = null;
         let tex_node: null | TexNode = null;
         let result: null | string = null;
         try {
@@ -42,11 +43,13 @@ caseFiles.forEach(({ title, cases }) => {
             preferTypstIntrinsic: c.preferTypstIntrinsic? c.preferTypstIntrinsic: false,
             customTexMacros: c.customTexMacros? c.customTexMacros: {},
           };
+          tokens = tokenize(tex);
           tex_node = parseTex(tex, settings.customTexMacros!);
           result = tex2typst(tex, settings);
           if (result !== typst) {
             console.log(`====== 😭 Wrong ======`);
             console.log(tex);
+            console.log(tokens);
             console.log(yaml.dump(tex_node));
           }
           expect(result).toBe(typst);

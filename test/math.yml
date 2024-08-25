@@ -300,3 +300,6 @@ cases:
   - title: thin space
     tex: a \, b
     typst: a thin b
+  - title: space before or after script
+    tex: \lim _{x \to 0} \sum_{i=1} ^ n
+    typst: lim_(x arrow.r 0) sum_(i = 1)^n

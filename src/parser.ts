@@ -226,12 +226,12 @@ function find_closing_curly_bracket_char(latex: string, start: number): number {
 }
 
 
-interface Token {
+export interface Token {
     type: 'element' | 'command' | 'text' | 'comment' | 'whitespace' | 'newline' | 'control' | 'unknown';
     value: string;
 }
 
-function tokenize(latex: string): Token[] {
+export function tokenize(latex: string): Token[] {
     const tokens: Token[] = [];
     let pos = 0;
 
@@ -492,22 +492,10 @@ export class LatexParser {
                     case '\\,':
                         return [{ type: 'control', content: '\\,' }, start + 1];
                     case '_': {
-                        let [sub, pos] = this.parseNextExpr(tokens, start + 1);
-                        let sup: TexNode | undefined = undefined;
-                        if (pos < tokens.length && token_eq(tokens[pos], SUP_SYMBOL)) {
-                            [sup, pos] = this.parseNextExpr(tokens, pos + 1);
-                        }
-                        const subData = { base: EMPTY_NODE, sub, sup };
-                        return [{ type: 'supsub', content: '', data: subData }, pos];
+                        return [ EMPTY_NODE, start];
                     }
                     case '^': {
-                        let [sup, pos] = this.parseNextExpr(tokens, start + 1);
-                        let sub: TexNode | undefined = undefined;
-                        if (pos < tokens.length && token_eq(tokens[pos], SUB_SYMBOL)) {
-                            [sub, pos] = this.parseNextExpr(tokens, pos + 1);
-                        }
-                        const supData = { base: EMPTY_NODE, sub, sup };
-                        return [{ type: 'supsub', content: '', data: supData }, pos];
+                        return [ EMPTY_NODE, start];
                     }
                     case '&':
                         return [{ type: 'control', content: '&' }, start + 1];
@@ -677,17 +665,40 @@ export class LatexParser {
     }
 }
 
-export function parseTex(tex: string, customTexMacros: {[key: string]: string}): TexNode {
-    const parser = new LatexParser();
-    const original_tokens = tokenize(tex);
-    let processed_tokens: Token[] = [];
-    for (const token of original_tokens) {
+// Remove all whitespace before or after _ or ^
+function passIgnoreWhitespaceBeforeScriptMark(tokens: Token[]): Token[] {
+    const is_script_mark = (token: Token) => token_eq(token, SUB_SYMBOL) || token_eq(token, SUP_SYMBOL);
+    let out_tokens: Token[] = [];
+    for (let i = 0; i < tokens.length; i++) {
+        if (tokens[i].type === 'whitespace' && i + 1 < tokens.length && is_script_mark(tokens[i + 1])) {
+            continue;
+        }
+        if (tokens[i].type === 'whitespace' && i - 1 >= 0 && is_script_mark(tokens[i - 1])) {
+            continue;
+        }
+        out_tokens.push(tokens[i]);
+    }
+    return out_tokens;
+}
+
+// expand custom tex macros
+function passExpandCustomTexMacros(tokens: Token[], customTexMacros: {[key: string]: string}): Token[] {
+    let out_tokens: Token[] = [];
+    for (const token of tokens) {
         if (token.type === 'command' && customTexMacros[token.value]) {
             const expanded_tokens = tokenize(customTexMacros[token.value]);
-            processed_tokens = processed_tokens.concat(expanded_tokens);
+            out_tokens = out_tokens.concat(expanded_tokens);
         } else {
-            processed_tokens.push(token);
+            out_tokens.push(token);
         }
     }
-    return parser.parse(processed_tokens);
+    return out_tokens;
+}
+
+export function parseTex(tex: string, customTexMacros: {[key: string]: string}): TexNode {
+    const parser = new LatexParser();
+    let tokens = tokenize(tex);
+    tokens = passIgnoreWhitespaceBeforeScriptMark(tokens);
+    tokens = passExpandCustomTexMacros(tokens, customTexMacros);
+    return parser.parse(tokens);
 }
