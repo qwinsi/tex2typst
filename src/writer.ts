@@ -274,6 +274,8 @@ export class TypstWriter {
                 this.insideFunctionDepth --;
             }
         } else if (node.type === 'unknownMacro') {
+            // TODO: At present, the parser does not produce nodes with type 'unknownMacro'.
+            // This is a placeholder for future implementation.
             if (this.nonStrict) {
                 this.queue.push({ type: 'symbol', content: node.content });
             } else {
