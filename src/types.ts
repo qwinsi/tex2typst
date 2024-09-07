@@ -1,3 +1,20 @@
+export enum TokenType {
+    ELEMENT,
+    COMMAND,
+    TEXT,
+    COMMENT,
+    WHITESPACE,
+    NEWLINE,
+    CONTROL,
+    UNKNOWN,
+}
+
+export interface Token {
+    type: TokenType;
+    value: string;
+}
+
+
 export interface TexSupsubData {
     base: TexNode;
     sup?: TexNode;

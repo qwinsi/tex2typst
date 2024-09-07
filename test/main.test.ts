@@ -2,10 +2,10 @@ import { describe, it, test, expect } from 'vitest';
 import yaml from 'js-yaml';
 import path from 'node:path';
 import fs from 'node:fs';
-import { parseTex, LatexParserError, Token, tokenize } from '../src/parser';
+import { parseTex, tokenize } from '../src/parser';
 import { tex2typst } from '../src/index';
 import { TypstWriterError } from '../src/writer';
-import { Tex2TypstOptions, TexNode } from '../src/types';
+import { Tex2TypstOptions, TexNode, Token } from '../src/types';
 
 type TestCase = {
   title: string;

@@ -1,4 +1,4 @@
-import { TexNode, TexSupsubData } from "./types";
+import { TexNode, TexSupsubData, Token, TokenType } from "./types";
 
 
 const UNARY_COMMANDS = [
@@ -60,8 +60,8 @@ function get_command_param_num(command: string): number {
     }
 }
 
-const LEFT_CURLY_BRACKET: Token = {type: 'control', value: '{'};
-const RIGHT_CURLY_BRACKET: Token = {type: 'control', value: '}'};
+const LEFT_CURLY_BRACKET: Token = {type: TokenType.CONTROL, value: '{'};
+const RIGHT_CURLY_BRACKET: Token = {type: TokenType.CONTROL, value: '}'};
 
 function find_closing_curly_bracket(tokens: Token[], start: number): number {
     assert(token_eq(tokens[start], LEFT_CURLY_BRACKET));
@@ -83,8 +83,8 @@ function find_closing_curly_bracket(tokens: Token[], start: number): number {
     return pos - 1;
 }
 
-const LEFT_SQUARE_BRACKET: Token = {type: 'element', value: '['};
-const RIGHT_SQUARE_BRACKET: Token = {type: 'element', value: ']'};
+const LEFT_SQUARE_BRACKET: Token = {type: TokenType.ELEMENT, value: '['};
+const RIGHT_SQUARE_BRACKET: Token = {type: TokenType.ELEMENT, value: ']'};
 
 function find_closing_square_bracket(tokens: Token[], start: number): number {
     assert(token_eq(tokens[start], LEFT_SQUARE_BRACKET));
@@ -117,7 +117,7 @@ function isdigit(char: string): boolean {
 
 function eat_whitespaces(tokens: Token[], start: number): Token[] {
     let pos = start;
-    while (pos < tokens.length && ['whitespace', 'newline'].includes(tokens[pos].type)) {
+    while (pos < tokens.length && [TokenType.WHITESPACE, TokenType.NEWLINE].includes(tokens[pos].type)) {
         pos++;
     }
     return tokens.slice(start, pos);
@@ -126,9 +126,9 @@ function eat_whitespaces(tokens: Token[], start: number): Token[] {
 
 function eat_parenthesis(tokens: Token[], start: number): Token | null {
     const firstToken = tokens[start];
-    if (firstToken.type === 'element' && ['(', ')', '[', ']', '|', '\\{', '\\}'].includes(firstToken.value)) {
+    if (firstToken.type === TokenType.ELEMENT && ['(', ')', '[', ']', '|', '\\{', '\\}'].includes(firstToken.value)) {
         return firstToken;
-    } else if (firstToken.type === 'command' && ['lfloor', 'rfloor', 'lceil', 'rceil', 'langle', 'rangle'].includes(firstToken.value.slice(1))) {
+    } else if (firstToken.type === TokenType.COMMAND && ['lfloor', 'rfloor', 'lceil', 'rceil', 'langle', 'rangle'].includes(firstToken.value.slice(1))) {
         return firstToken;
     } else {
         return null;
@@ -137,7 +137,7 @@ function eat_parenthesis(tokens: Token[], start: number): Token | null {
 
 function eat_primes(tokens: Token[], start: number): number {
     let pos = start;
-    while (pos < tokens.length && token_eq(tokens[pos], { type: 'element', value: "'" })) {
+    while (pos < tokens.length && token_eq(tokens[pos], { type: TokenType.ELEMENT, value: "'" })) {
         pos += 1;
     }
     return pos - start;
@@ -155,8 +155,8 @@ function eat_command_name(latex: string, start: number): string {
 
 
 
-const LEFT_COMMAND: Token = { type: 'command', value: '\\left' };
-const RIGHT_COMMAND: Token = { type: 'command', value: '\\right' };
+const LEFT_COMMAND: Token = { type: TokenType.COMMAND, value: '\\left' };
+const RIGHT_COMMAND: Token = { type: TokenType.COMMAND, value: '\\right' };
 
 function find_closing_right_command(tokens: Token[], start: number): number {
     let count = 1;
@@ -178,8 +178,8 @@ function find_closing_right_command(tokens: Token[], start: number): number {
 }
 
 
-const BEGIN_COMMAND: Token = { type: 'command', value: '\\begin' };
-const END_COMMAND: Token = { type: 'command', value: '\\end' };
+const BEGIN_COMMAND: Token = { type: TokenType.COMMAND, value: '\\begin' };
+const END_COMMAND: Token = { type: TokenType.COMMAND, value: '\\end' };
 
 
 function find_closing_end_command(tokens: Token[], start: number): number {
@@ -226,11 +226,6 @@ function find_closing_curly_bracket_char(latex: string, start: number): number {
 }
 
 
-export interface Token {
-    type: 'element' | 'command' | 'text' | 'comment' | 'whitespace' | 'newline' | 'control' | 'unknown';
-    value: string;
-}
-
 export function tokenize(latex: string): Token[] {
     const tokens: Token[] = [];
     let pos = 0;
@@ -244,7 +239,7 @@ export function tokenize(latex: string): Token[] {
                 while (newPos < latex.length && latex[newPos] !== '\n') {
                     newPos += 1;
                 }
-                token = { type: 'comment', value: latex.slice(pos + 1, newPos) };
+                token = { type: TokenType.COMMENT, value: latex.slice(pos + 1, newPos) };
                 pos = newPos;
                 break;
             }
@@ -253,19 +248,19 @@ export function tokenize(latex: string): Token[] {
             case '_':
             case '^':
             case '&':
-                token = { type: 'control', value: firstChar};
+                token = { type: TokenType.CONTROL, value: firstChar};
                 pos++;
                 break;
             case '\n':
-                token = { type: 'newline', value: firstChar};
+                token = { type: TokenType.NEWLINE, value: firstChar};
                 pos++;
                 break;
             case '\r': {
                 if (pos + 1 < latex.length && latex[pos + 1] === '\n') {
-                    token = { type: 'newline', value: '\n' };
+                    token = { type: TokenType.NEWLINE, value: '\n' };
                     pos += 2;
                 } else {
-                    token = { type: 'newline', value: '\n' };
+                    token = { type: TokenType.NEWLINE, value: '\n' };
                     pos ++;
                 }
                 break;
@@ -275,7 +270,7 @@ export function tokenize(latex: string): Token[] {
                 while (newPos < latex.length && latex[newPos] === ' ') {
                     newPos += 1;
                 }
-                token = {type: 'whitespace', value: latex.slice(pos, newPos)};
+                token = {type: TokenType.WHITESPACE, value: latex.slice(pos, newPos)};
                 pos = newPos;
                 break;
             }
@@ -285,12 +280,12 @@ export function tokenize(latex: string): Token[] {
                 }
                 const firstTwoChars = latex.slice(pos, pos + 2);
                 if (['\\\\', '\\,'].includes(firstTwoChars)) {
-                    token = { type: 'control', value: firstTwoChars };
+                    token = { type: TokenType.CONTROL, value: firstTwoChars };
                 } else if (['\\{','\\}', '\\%', '\\$', '\\&', '\\#', '\\_'].includes(firstTwoChars)) {
-                    token = { type: 'element', value: firstTwoChars };
+                    token = { type: TokenType.ELEMENT, value: firstTwoChars };
                 } else {
                     const command = eat_command_name(latex, pos + 1);
-                    token = { type: 'command', value: '\\' + command};
+                    token = { type: TokenType.COMMAND, value: '\\' + command};
                 }
                 pos += token.value.length;
                 break;
@@ -301,13 +296,13 @@ export function tokenize(latex: string): Token[] {
                     while (newPos < latex.length && isdigit(latex[newPos])) {
                         newPos += 1;
                     }
-                    token = { type: 'element', value: latex.slice(pos, newPos) }
+                    token = { type: TokenType.ELEMENT, value: latex.slice(pos, newPos) }
                 } else if (isalpha(firstChar)) {
-                    token = { type: 'element', value: firstChar };
+                    token = { type: TokenType.ELEMENT, value: firstChar };
                 } else if ('+-*/=\'<>!.,;?()[]|'.includes(firstChar)) {
-                    token = { type: 'element', value: firstChar }
+                    token = { type: TokenType.ELEMENT, value: firstChar }
                 } else {
-                    token = { type: 'unknown', value: firstChar };
+                    token = { type: TokenType.UNKNOWN, value: firstChar };
                 }
                 pos += token.value.length;
             }
@@ -315,11 +310,11 @@ export function tokenize(latex: string): Token[] {
 
         tokens.push(token);
 
-        if (token.type === 'command' && ['\\text', '\\begin', '\\end'].includes(token.value)) {
+        if (token.type === TokenType.COMMAND && ['\\text', '\\begin', '\\end'].includes(token.value)) {
             if (pos >= latex.length || latex[pos] !== '{') {
                 throw new LatexParserError(`No content for ${token.value} command`);
             }
-            tokens.push({ type: 'control', value: '{' });
+            tokens.push({ type: TokenType.CONTROL, value: '{' });
             const posClosingBracket = find_closing_curly_bracket_char(latex, pos);
             pos++;
             let textInside = latex.slice(pos, posClosingBracket);
@@ -328,8 +323,8 @@ export function tokenize(latex: string): Token[] {
             for (const char of chars) {
                 textInside = textInside.replaceAll('\\' + char, char);
             }
-            tokens.push({ type: 'text', value: textInside });
-            tokens.push({ type: 'control', value: '}' });
+            tokens.push({ type: TokenType.TEXT, value: textInside });
+            tokens.push({ type: TokenType.CONTROL, value: '}' });
             pos = posClosingBracket + 1;
         }
     }
@@ -351,8 +346,8 @@ export class LatexParserError extends Error {
 
 type ParseResult = [TexNode, number];
 
-const SUB_SYMBOL:Token = { type: 'control', value: '_' };
-const SUP_SYMBOL:Token = { type: 'control', value: '^' };
+const SUB_SYMBOL:Token = { type: TokenType.CONTROL, value: '_' };
+const SUP_SYMBOL:Token = { type: TokenType.CONTROL, value: '^' };
 
 export class LatexParser {
     space_sensitive: boolean;
@@ -464,13 +459,17 @@ export class LatexParser {
         const firstToken = tokens[start];
         const tokenType = firstToken.type;
         switch (tokenType) {
-            case 'element':
-            case 'text':
-            case 'comment':
-            case 'whitespace':
-            case 'newline':
-                return [{ type: tokenType, content: firstToken.value }, start + 1];
-            case 'command':
+            case TokenType.ELEMENT:
+                return [{ type: 'element', content: firstToken.value }, start + 1];
+            case TokenType.TEXT:
+                return [{ type: 'text', content: firstToken.value }, start + 1];
+            case TokenType.COMMENT:
+                return [{ type: 'comment', content: firstToken.value }, start + 1];
+            case TokenType.WHITESPACE:
+                return [{ type: 'whitespace', content: firstToken.value }, start + 1];
+            case TokenType.NEWLINE:
+                return [{ type: 'newline', content: firstToken.value }, start + 1];
+            case TokenType.COMMAND:
                 if (token_eq(firstToken, BEGIN_COMMAND)) {
                     return this.parseBeginEndExpr(tokens, start);
                 } else if (token_eq(firstToken, LEFT_COMMAND)) {
@@ -478,7 +477,7 @@ export class LatexParser {
                 } else {
                     return this.parseCommandExpr(tokens, start);
                 }
-            case 'control':
+            case TokenType.CONTROL:
                 const controlChar = firstToken.value;
                 switch (controlChar) {
                     case '{':
@@ -508,7 +507,7 @@ export class LatexParser {
     }
 
     parseCommandExpr(tokens: Token[], start: number): ParseResult {
-        assert(tokens[start].type === 'command');
+        assert(tokens[start].type === TokenType.COMMAND);
 
         const command = tokens[start].value; // command name starts with a \
 
@@ -534,7 +533,7 @@ export class LatexParser {
                     throw new LatexParserError('Expecting content for \\text command');
                 }
                 assert(token_eq(tokens[pos], LEFT_CURLY_BRACKET));
-                assert(tokens[pos + 1].type === 'text');
+                assert(tokens[pos + 1].type === TokenType.TEXT);
                 assert(token_eq(tokens[pos + 2], RIGHT_CURLY_BRACKET));
                 const text = tokens[pos + 1].value;
                 return [{ type: 'text', content: text }, pos + 3];
@@ -600,7 +599,7 @@ export class LatexParser {
 
         let pos = start + 1;
         assert(token_eq(tokens[pos], LEFT_CURLY_BRACKET));
-        assert(tokens[pos + 1].type === 'text');
+        assert(tokens[pos + 1].type === TokenType.TEXT);
         assert(token_eq(tokens[pos + 2], RIGHT_CURLY_BRACKET));
         const envName = tokens[pos + 1].value;
         pos += 3;
@@ -617,7 +616,7 @@ export class LatexParser {
         pos = endIdx + 1;
         
         assert(token_eq(tokens[pos], LEFT_CURLY_BRACKET));
-        assert(tokens[pos + 1].type === 'text');
+        assert(tokens[pos + 1].type === TokenType.TEXT);
         assert(token_eq(tokens[pos + 2], RIGHT_CURLY_BRACKET));
         if (tokens[pos + 1].value !== envName) {
             throw new LatexParserError('Mismatched \\begin and \\end environments');
@@ -626,7 +625,7 @@ export class LatexParser {
     
         const exprInside = tokens.slice(exprInsideStart, exprInsideEnd);
         // ignore whitespaces and '\n' before \end{envName}
-        while(exprInside.length > 0 && ['whitespace', 'newline'].includes(exprInside[exprInside.length - 1].type)) {
+        while(exprInside.length > 0 && [TokenType.WHITESPACE, TokenType.NEWLINE].includes(exprInside[exprInside.length - 1].type)) {
             exprInside.pop();
         }
         const body = this.parseAligned(exprInside);
@@ -670,10 +669,10 @@ function passIgnoreWhitespaceBeforeScriptMark(tokens: Token[]): Token[] {
     const is_script_mark = (token: Token) => token_eq(token, SUB_SYMBOL) || token_eq(token, SUP_SYMBOL);
     let out_tokens: Token[] = [];
     for (let i = 0; i < tokens.length; i++) {
-        if (tokens[i].type === 'whitespace' && i + 1 < tokens.length && is_script_mark(tokens[i + 1])) {
+        if (tokens[i].type === TokenType.WHITESPACE && i + 1 < tokens.length && is_script_mark(tokens[i + 1])) {
             continue;
         }
-        if (tokens[i].type === 'whitespace' && i - 1 >= 0 && is_script_mark(tokens[i - 1])) {
+        if (tokens[i].type === TokenType.WHITESPACE && i - 1 >= 0 && is_script_mark(tokens[i - 1])) {
             continue;
         }
         out_tokens.push(tokens[i]);
@@ -685,7 +684,7 @@ function passIgnoreWhitespaceBeforeScriptMark(tokens: Token[]): Token[] {
 function passExpandCustomTexMacros(tokens: Token[], customTexMacros: {[key: string]: string}): Token[] {
     let out_tokens: Token[] = [];
     for (const token of tokens) {
-        if (token.type === 'command' && customTexMacros[token.value]) {
+        if (token.type === TokenType.COMMAND && customTexMacros[token.value]) {
             const expanded_tokens = tokenize(customTexMacros[token.value]);
             out_tokens = out_tokens.concat(expanded_tokens);
         } else {
