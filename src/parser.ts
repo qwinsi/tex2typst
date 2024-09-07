@@ -42,7 +42,7 @@ const BINARY_COMMANDS = [
     'tbinom',
 ]
 
-const EMPTY_NODE = { 'type': 'empty', 'content': '' }
+const EMPTY_NODE: TexNode = { type: 'empty', content: '' };
 
 function assert(condition: boolean, message: string = ''): void {
     if (!condition) {
@@ -586,12 +586,12 @@ export class LatexParser {
 
         const exprInside = tokens.slice(exprInsideStart, exprInsideEnd);
         const body = this.parse(exprInside);
-        const args = [
+        const args: TexNode[] = [
             { type: 'element', content: leftDelimiter.value },
             body,
             { type: 'element', content: rightDelimiter.value }
         ]
-        const res = { type: 'leftright', content: '', args: args };
+        const res: TexNode = { type: 'leftright', content: '', args: args };
         return [res, pos];
     }
 
@@ -630,7 +630,7 @@ export class LatexParser {
             exprInside.pop();
         }
         const body = this.parseAligned(exprInside);
-        const res = { type: 'beginend', content: envName, data: body };
+        const res: TexNode = { type: 'beginend', content: envName, data: body };
         return [res, pos];
     }
 

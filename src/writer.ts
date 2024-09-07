@@ -15,7 +15,7 @@ const TYPST_INTRINSIC_SYMBOLS = [
 ];
 
 export class TypstWriterError extends Error {
-    node: TexNode;
+    node: TexNode | TypstNode;
 
     constructor(message: string, node: TexNode | TypstNode) {
         super(message);
@@ -273,7 +273,6 @@ export class TypstWriter {
                 this.queue.push({ type: 'atom', content: ')'});
                 this.insideFunctionDepth --;
             }
-        } else if (node.type === 'matrix') {
         } else if (node.type === 'unknownMacro') {
             if (this.nonStrict) {
                 this.queue.push({ type: 'symbol', content: node.content });

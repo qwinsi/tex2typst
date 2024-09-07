@@ -9,7 +9,8 @@ export type TexSqrtData = TexNode;
 export type TexArrayData = TexNode[][];
 
 export interface TexNode {
-    type: string;
+    type: 'element' | 'text' | 'comment' | 'whitespace' | 'newline' | 'control' | 'ordgroup' | 'supsub'
+             | 'unaryFunc' | 'binaryFunc' | 'leftright' | 'beginend' | 'symbol' | 'empty' | 'unknownMacro';
     content: string;
     args?: TexNode[];
     // position?: Position;
@@ -20,7 +21,7 @@ export interface TexNode {
 }
 
 export interface TypstNode {
-    type: 'atom' | 'symbol' | 'text' | 'softSpace' | 'comment' | 'newline',
+    type: 'atom' | 'symbol' | 'text' | 'softSpace' | 'comment' | 'newline';
     content: string;
     args?: TypstNode[];
 }
