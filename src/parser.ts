@@ -1,3 +1,4 @@
+import { symbolMap } from "./map";
 import { TexNode, TexSupsubData, Token, TokenType } from "./types";
 
 
@@ -517,35 +518,42 @@ export class LatexParser {
             throw new LatexParserError('Unexpected command: ' + command);
         } 
 
+
         const paramNum = get_command_param_num(command.slice(1));
-        if (paramNum === 0) {
-            return [{ type: 'symbol', content: command }, pos];
-        } else if (paramNum === 1) {
-            if (command === '\\sqrt' && pos < tokens.length && token_eq(tokens[pos], LEFT_SQUARE_BRACKET)) {
-                const posLeftSquareBracket = pos;
-                const posRightSquareBracket = find_closing_square_bracket(tokens, pos);
-                const exprInside = tokens.slice(posLeftSquareBracket + 1, posRightSquareBracket);
-                const exponent = this.parse(exprInside);
-                const [arg1, newPos] = this.parseNextExprWithoutSupSub(tokens, posRightSquareBracket + 1);
-                return [{ type: 'unaryFunc', content: command, args: [arg1], data: exponent }, newPos];
-            } else if (command === '\\text') {
-                if (pos + 2 >= tokens.length) {
-                    throw new LatexParserError('Expecting content for \\text command');
+        switch (paramNum) {
+            case 0:
+                if (!symbolMap.has(command.slice(1))) {
+                    return [{ type: 'unknownMacro', content: command }, pos];
                 }
-                assert(token_eq(tokens[pos], LEFT_CURLY_BRACKET));
-                assert(tokens[pos + 1].type === TokenType.TEXT);
-                assert(token_eq(tokens[pos + 2], RIGHT_CURLY_BRACKET));
-                const text = tokens[pos + 1].value;
-                return [{ type: 'text', content: text }, pos + 3];
+                return [{ type: 'symbol', content: command }, pos];
+            case 1: {
+                if (command === '\\sqrt' && pos < tokens.length && token_eq(tokens[pos], LEFT_SQUARE_BRACKET)) {
+                    const posLeftSquareBracket = pos;
+                    const posRightSquareBracket = find_closing_square_bracket(tokens, pos);
+                    const exprInside = tokens.slice(posLeftSquareBracket + 1, posRightSquareBracket);
+                    const exponent = this.parse(exprInside);
+                    const [arg1, newPos] = this.parseNextExprWithoutSupSub(tokens, posRightSquareBracket + 1);
+                    return [{ type: 'unaryFunc', content: command, args: [arg1], data: exponent }, newPos];
+                } else if (command === '\\text') {
+                    if (pos + 2 >= tokens.length) {
+                        throw new LatexParserError('Expecting content for \\text command');
+                    }
+                    assert(token_eq(tokens[pos], LEFT_CURLY_BRACKET));
+                    assert(tokens[pos + 1].type === TokenType.TEXT);
+                    assert(token_eq(tokens[pos + 2], RIGHT_CURLY_BRACKET));
+                    const text = tokens[pos + 1].value;
+                    return [{ type: 'text', content: text }, pos + 3];
+                }
+                let [arg1, newPos] = this.parseNextExprWithoutSupSub(tokens, pos);
+                return [{ type: 'unaryFunc', content: command, args: [arg1] }, newPos];
             }
-            let [arg1, newPos] = this.parseNextExprWithoutSupSub(tokens, pos);
-            return [{ type: 'unaryFunc', content: command, args: [arg1] }, newPos];
-        } else if (paramNum === 2) {
-            const [arg1, pos1] = this.parseNextExprWithoutSupSub(tokens, pos);
-            const [arg2, pos2] = this.parseNextExprWithoutSupSub(tokens, pos1);
-            return [{ type: 'binaryFunc', content: command, args: [arg1, arg2] }, pos2];
-        } else {
-            throw new Error( 'Invalid number of parameters');
+            case 2: {
+                const [arg1, pos1] = this.parseNextExprWithoutSupSub(tokens, pos);
+                const [arg2, pos2] = this.parseNextExprWithoutSupSub(tokens, pos1);
+                return [{ type: 'binaryFunc', content: command, args: [arg1, arg2] }, pos2];
+            }
+            default:
+                throw new Error( 'Invalid number of parameters');
         }
     }
 

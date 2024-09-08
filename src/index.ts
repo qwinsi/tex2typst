@@ -6,7 +6,7 @@ import { symbolMap } from "./map";
 
 export function tex2typst(tex: string, options?: Tex2TypstOptions): string {
     const opt: Tex2TypstOptions = {
-        nonStrict: false,
+        nonStrict: true,
         preferTypstIntrinsic: true,
         customTexMacros: {}
     };
