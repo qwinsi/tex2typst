@@ -15,7 +15,7 @@
   ],
   "scripts": {
     "prebuild": "rimraf dist/",
-    "build:node": "bun build --entrypoints src/index.ts  --outdir ./dist  --target node --external katex",
+    "build:node": "bun build --entrypoints src/index.ts  --outdir ./dist  --target node",
     "build:browser": "bun build --entrypoints src/tex2typst.ts --outdir ./dist --target browser --entry-naming [dir]/[name].min.[ext] --minify",
     "build:types": "tsc --project ./tsconfig.json",
     "build": "npm run build:node && npm run build:browser && npm run build:types",
