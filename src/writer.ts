@@ -197,15 +197,10 @@ export class TypstWriter {
                 // Fall through
             } else if (node.content === '\\operatorname') {
                 let body = node.args!;
-                if (body.length === 1 && body[0].type == 'ordgroup') {
-                    body = body[0].args!;
+                if (body.length !== 1 || body[0].type !== 'text') {
+                    throw new TypstWriterError(`Expecting body of \\operatorname to be text but got`, node);
                 }
-                const text = body.reduce((buff, n) => {
-                    // Hope convertToken() will not throw an error
-                    // If it does, the input is bad.
-                    buff += convertToken(n.content);
-                    return buff;
-                }, "" as string);
+                const text = body[0].content;
 
                 if (this.preferTypstIntrinsic && TYPST_INTRINSIC_SYMBOLS.includes(text)) {
                     // e.g. we prefer just sech over op("sech")

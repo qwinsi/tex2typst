@@ -311,7 +311,7 @@ export function tokenize(latex: string): Token[] {
 
         tokens.push(token);
 
-        if (token.type === TokenType.COMMAND && ['\\text', '\\begin', '\\end'].includes(token.value)) {
+        if (token.type === TokenType.COMMAND && ['\\text', '\\operatorname', '\\begin', '\\end'].includes(token.value)) {
             if (pos >= latex.length || latex[pos] !== '{') {
                 throw new LatexParserError(`No content for ${token.value} command`);
             }
