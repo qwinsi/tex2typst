@@ -63,7 +63,7 @@ graph LR
 ```
 
 - parser: Implemented in class `LatexParser`.
-- converter: Implemented in function `converterTree`.
+- converter: Implemented in function `convertTree`.
 - writer: Implemented in class `TypstWriter`.
 
 ## Contributing
