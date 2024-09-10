@@ -59,11 +59,12 @@ console.log(output);
 
 ```mermaid
 graph LR
-    tex[TeX code] --parser--> ast[TeX AST] --writer--> typst[Typst code]
+    tex[TeX code] --parser--> tex_ast[TeX AST] --converter--> typst_ast[Typst AST] --writer--> typst[Typst code]
 ```
 
-- parser: Implemented in class `LatexParser()`.
-- writer: Implemented in class `TypstWriter()`
+- parser: Implemented in class `LatexParser`.
+- converter: Implemented in function `converterTree`.
+- writer: Implemented in class `TypstWriter`.
 
 ## Contributing
 
