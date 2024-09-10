@@ -37,10 +37,20 @@ export interface TexNode {
     data?: TexSqrtData | TexSupsubData | TexArrayData;
 }
 
+export interface TypstSupsubData {
+    base: TypstNode;
+    sup?: TypstNode;
+    sub?: TypstNode;
+}
+
+export type TypstArrayData = TypstNode[][];
+
 export interface TypstNode {
-    type: 'atom' | 'symbol' | 'text' | 'softSpace' | 'comment' | 'newline';
+    type: 'atom' | 'symbol' | 'text' | 'softSpace' | 'comment' | 'newline'
+            | 'empty' | 'group' | 'supsub' | 'unaryFunc' | 'binaryFunc' | 'align' | 'matrix' | 'unknown';
     content: string;
     args?: TypstNode[];
+    data?: TypstSupsubData | TypstArrayData;
 }
 
 export interface Tex2TypstOptions {

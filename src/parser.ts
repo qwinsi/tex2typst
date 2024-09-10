@@ -439,7 +439,7 @@ export class LatexParser {
             if (num_prime > 0) {
                 res.sup = { type: 'ordgroup', content: '', args:  [] };
                 for (let i = 0; i < num_prime; i++) {
-                    res.sup.args!.push({ type: 'symbol', content: '\\prime' });
+                    res.sup.args!.push({ type: 'element', content: "'" });
                 }
                 if (sup) {
                     res.sup.args!.push(sup);

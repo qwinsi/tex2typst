@@ -44,7 +44,7 @@ cases:
     typst: 'r_(s^+)'
   - title: Nested functions
     tex: '\boldsymbol{m}_\text{ref}'
-    typst: 'bold(m)_("ref")'
+    typst: 'bold(m)_"ref"'
   - title: left and right brackets
     tex: '\left[ \boldsymbol{A} \right) \left\{b \right)'
     typst: 'lr([ bold(A))) lr({b))'
@@ -150,7 +150,7 @@ cases:
     typst: '""_2'
   - title: leading power
     tex: '^{\text{st}}'
-    typst: '""^("st")'
+    typst: '""^"st"'
   - title: greater than
     tex: 'a \ge b'
     typst: a gt.eq b

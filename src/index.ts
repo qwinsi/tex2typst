@@ -1,6 +1,6 @@
 import { parseTex } from "./parser";
 import { Tex2TypstOptions } from "./types";
-import { TypstWriter } from "./writer";
+import { convertTree, TypstWriter } from "./writer";
 import { symbolMap } from "./map";
 
 
@@ -21,9 +21,10 @@ export function tex2typst(tex: string, options?: Tex2TypstOptions): string {
             opt.customTexMacros = options.customTexMacros;
         }
     }
-    const t = parseTex(tex, opt.customTexMacros!);
+    const texTree = parseTex(tex, opt.customTexMacros!);
+    const typstTree = convertTree(texTree);
     const writer = new TypstWriter(opt.nonStrict!, opt.preferTypstIntrinsic!);
-    writer.append(t);
+    writer.append(typstTree);
     return writer.finalize();
 }
 
