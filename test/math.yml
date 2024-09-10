@@ -303,3 +303,9 @@ cases:
   - title: space before or after script
     tex: \lim _{x \to 0} \sum_{i=1} ^ n
     typst: lim_(x arrow.r 0) sum_(i = 1)^n
+  - title: spaces around text
+    tex: i_D = \mu_n C_\text{ox} \frac{W}{L} \left[ (v_\text{GS} - V_t)v_\text{DS} - \frac{1}{2} v_\text{DS}^2 \right]
+    typst: i_D = mu_n C_"ox" frac(W, L) [(v_"GS" - V_t) v_"DS" - frac(1, 2) v_"DS"^2 ]
+  - title: base is group wrapped in brackets
+    tex: e = \lim_{{n \to \infty}} \left(1 + \frac{1}{n}\right)^n
+    typst: e = lim_(n arrow.r infinity)(1 + frac(1, n))^n

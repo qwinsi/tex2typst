@@ -14,6 +14,11 @@ const TYPST_INTRINSIC_SYMBOLS = [
     // 'sgn
 ];
 
+
+function is_delimiter(c: TypstNode): boolean {
+    return c.type === 'atom' && ['(', ')', '[', ']', '{', '}', '|', '⌊', '⌋', '⌈', '⌉'].includes(c.content);
+}
+
 export class TypstWriterError extends Error {
     node: TexNode | TypstNode;
 
@@ -60,7 +65,7 @@ export class TypstWriter {
             // buffer is empty
             no_need_space ||= this.buffer === "";
             // other cases
-            no_need_space ||= /[\s"_^{\(]$/.test(this.buffer);
+            no_need_space ||= /[\s_^{\(]$/.test(this.buffer);
             if(!no_need_space) {
                 this.buffer += ' ';
             }
@@ -77,14 +82,15 @@ export class TypstWriter {
         switch (node.type) {
             case 'empty':
                 break;
-            case 'symbol': {
-                let content = node.content!;
+            case 'atom': {
                 if (node.content === ',' && this.insideFunctionDepth > 0) {
-                    content = 'comma';
+                    this.queue.push({ type: 'symbol', content: 'comma' });
+                } else {
+                    this.queue.push({ type: 'atom', content: node.content });
                 }
-                this.queue.push({ type: 'symbol', content: content });
                 break;
             }
+            case 'symbol':
             case 'text':
             case 'comment':
             case 'newline':
@@ -100,7 +106,7 @@ export class TypstWriter {
                 this.appendWithBracketsIfNeeded(base);
 
                 let trailing_space_needed = false;
-                const has_prime = (sup && sup.type === 'symbol' && sup.content === '\'');
+                const has_prime = (sup && sup.type === 'atom' && sup.content === '\'');
                 if (has_prime) {
                     // Put prime symbol before '_'. Because $y_1'$ is not displayed properly in Typst (so far)
                     // e.g. 
@@ -206,21 +212,25 @@ export class TypstWriter {
     }
 
     private appendWithBracketsIfNeeded(node: TypstNode): boolean {
-        const is_single = !['group', 'supsub', 'empty'].includes(node.type);
-        if (is_single) {
-            this.append(node);
-        } else {
-            this.queue.push({
-                type: 'atom',
-                content: '('
-            });
-            this.append(node);
-            this.queue.push({
-                type: 'atom',
-                content: ')'
-            });
+        let need_to_wrap = ['group', 'supsub', 'empty'].includes(node.type);
+
+        if (node.type === 'group') {
+            const first = node.args![0];
+            const last = node.args![node.args!.length - 1];
+            if (is_delimiter(first) && is_delimiter(last)) {
+                need_to_wrap = false;
+            }
         }
-        return is_single;
+
+        if (need_to_wrap) {
+            this.queue.push({ type: 'atom', content: '(' });
+            this.append(node);
+            this.queue.push({ type: 'atom', content: ')' });
+        } else {
+            this.append(node);
+        }
+
+        return !need_to_wrap;
     }
 
     protected flushQueue() {
@@ -288,6 +298,7 @@ export function convertTree(node: TexNode): TypstNode {
                 args: node.args!.map(convertTree),
             };
         case 'element':
+            return { type: 'atom', content: convertToken(node.content) };
         case 'symbol':
             return { type: 'symbol', content: convertToken(node.content) };
         case 'text':
@@ -382,7 +393,7 @@ export function convertTree(node: TexNode): TypstNode {
                 };
             }
             // \mathbb{R} -> RR
-            if (node.content === '\\mathbb' && arg0.type === 'symbol' && /^[A-Z]$/.test(arg0.content)) {
+            if (node.content === '\\mathbb' && arg0.type === 'atom' && /^[A-Z]$/.test(arg0.content)) {
                 return {
                     type: 'symbol',
                     content: arg0.content + arg0.content,
