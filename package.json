@@ -25,6 +25,7 @@
   "devDependencies": {
     "@types/node": "^20.14.10",
     "esbuild": "^0.25.1",
+    "jison-gho": "^0.6.1-216",
     "js-yaml": "^4.1.0",
     "toml": "^3.0.0",
     "typescript": "^5.5.3",
