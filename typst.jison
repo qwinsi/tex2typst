@@ -1,4 +1,11 @@
+%{
+import { TypstNode, TypstTokenType, TypstToken,
+    TypstTerminal } from "./typst-types";
+
+%}
+
 %lex
+
 
 %%
 \s+              /* skip whitespace */
@@ -7,7 +14,10 @@
 "/"        return '/';
 "+"        return '+';
 "-"        return '-';
-[a-zA-Z_]+  return 'IDENTIFIER';
+"_"        return '_';
+"^"        return '^';
+\".*\"     return 'TEXT';
+[a-z^A-Z_]+  return 'SYMBOL';
 <<EOF>>               return 'EOF';
 .                     return 'INVALID';
 
@@ -29,10 +39,28 @@ typinput
     ;
 
 expression
-    : IDENTIFIER { $$ = new TypstNode('IDENTIFIER', $1); }
-    | NUMBER { $$ = new TypstNode('NUMBER', $1); }
-    | expression '+' expression { $$ = new TypstNode('ADD', $2, [$1, $3]); }
-    | expression '-' expression { $$ = new TypstNode('SUB', $2, [$1, $3]); }
-    | expression '*' expression { $$ = new TypstNode('MUL', $2, [$1, $3]); }
-    | expression '/' expression { $$ = new TypstNode('DIV', $2, [$1, $3]); }
+    : terminal
+    | supsub
+    | funcCall
+    | fraction
+    ;
+
+terminal
+    : ELEMENT { $$ = new TypstTerminal(new TypstToken(TypstTokenType.ELEMENT, $1)); }
+    | SYMBOL { $$ = new TypstTerminal(new TypstToken(TypstTokenType.SYMBOL, $1)); }
+    | TEXT { $$ = new TypstTerminal(new TypstToken(TypstTokenType.TEXT, $1)); }
+    ;
+
+supsub
+    : expression '_' expression { $$ = new TypstSupsub({ base: $1, sub: $2 }); }
+    | expression '^' expression { $$ = new TypstSupsub({ base: $1, sup: $2 }); }
+    | expression '_' expression '^' expression { $$ = new TypstSupsub({ base: $1, sub: $2, sup: $3 }); }
+    ;
+
+funcCall
+    : SYMBOL '(' expression ')' { $$ = new TypstFuncCall([$1]); }
+    ;
+
+fraction
+    : expression '/' expression { $$ = new TypstFraction([$1, $3]); }
     ;

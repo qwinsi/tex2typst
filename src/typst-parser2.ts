@@ -31,7 +31,7 @@ class TypstNode {
  * npx jison typ.jison --module-type=es
  */
 
-const input = "1 + 2 * 3 - a / b";
+const input = "1 + 2 * 3 - a / b + f(x)";
 
 export function parseTypst(typst: string): TypstNode {
     return typst_parser.parse(typst) as any as TypstNode;
