@@ -1,12 +1,8 @@
 import { TexNode } from "./tex-types";
-import { TypstFraction, TypstFuncCall, TypstGroup, TypstLeftright, TypstMarkupFunc, TypstMatrixLike, TypstNode, TypstSupsub, TypstTerminal } from "./typst-types";
+import { TypstNode, TypstWriterOptions } from "./typst-types";
 import { TypstToken } from "./typst-types";
 import { TypstTokenType } from "./typst-types";
-import { shorthandMap } from "./typst-shorthands";
 
-function is_delimiter(c: TypstNode): boolean {
-    return c.head.type === TypstTokenType.ELEMENT && ['(', ')', '[', ']', '{', '}', '|', '⌊', '⌋', '⌈', '⌉'].includes(c.head.value);
-}
 
 const TYPST_LEFT_PARENTHESIS: TypstToken = new TypstToken(TypstTokenType.ELEMENT, '(');
 const TYPST_RIGHT_PARENTHESIS: TypstToken = new TypstToken(TypstTokenType.ELEMENT, ')');
@@ -25,32 +21,16 @@ export class TypstWriterError extends Error {
     }
 }
 
-export interface TypstWriterOptions {
-    nonStrict: boolean;
-    preferShorthands: boolean;
-    keepSpaces: boolean;
-    inftyToOo: boolean;
-    optimize: boolean;
-}
+
 
 export class TypstWriter {
-    private nonStrict: boolean;
-    private preferShorthands: boolean;
-    private keepSpaces: boolean;
-    private inftyToOo: boolean;
-    private optimize: boolean;
-
     protected buffer: string = "";
     protected queue: TypstToken[] = [];
 
-    private insideFunctionDepth = 0;
+    private options: TypstWriterOptions;
 
     constructor(options: TypstWriterOptions) {
-        this.nonStrict = options.nonStrict;
-        this.preferShorthands = options.preferShorthands;
-        this.keepSpaces = options.keepSpaces;
-        this.inftyToOo = options.inftyToOo;
-        this.optimize = options.optimize;
+        this.options = options;
     }
 
 
@@ -78,8 +58,8 @@ export class TypstWriter {
         no_need_space ||= str.startsWith('\n');
         // buffer is empty
         no_need_space ||= this.buffer === "";
-        // str is starting with a space itself
-        no_need_space ||= /^\s/.test(str);
+        // don't put space multiple times
+        no_need_space ||= (/\s$/.test(this.buffer) || /^\s/.test(str));
         // "&=" instead of "& ="
         no_need_space ||= this.buffer.endsWith('&') && str === '=';
         // before or after a slash e.g. "a/b" instead of "a / b"
@@ -100,268 +80,42 @@ export class TypstWriter {
 
     // Serialize a tree of TypstNode into a list of TypstToken
     public serialize(abstractNode: TypstNode) {
-        switch (abstractNode.type) {
-            case 'terminal': {
-                const node = abstractNode as TypstTerminal;
-                if (node.head.type === TypstTokenType.ELEMENT) {
-                    if (node.head.value === ',' && this.insideFunctionDepth > 0) {
-                        this.queue.push(new TypstToken(TypstTokenType.SYMBOL, 'comma'));
-                    } else {
-                        this.queue.push(node.head);
-                    }
-                    break;
-                } else if (node.head.type === TypstTokenType.SYMBOL) {
-                    let symbol_name = node.head.value;
-                    if(this.preferShorthands) {
-                        if (shorthandMap.has(symbol_name)) {
-                            symbol_name = shorthandMap.get(symbol_name)!;
-                        }
-                    }
-                    if (this.inftyToOo && symbol_name === 'infinity') {
-                        symbol_name = 'oo';
-                    }
-                    this.queue.push(new TypstToken(TypstTokenType.SYMBOL, symbol_name));
-                    break;
-                } else if (node.head.type === TypstTokenType.SPACE || node.head.type === TypstTokenType.NEWLINE) {
-                    for (const c of node.head.value) {
-                        if (c === ' ') {
-                            if (this.keepSpaces) {
-                                this.queue.push(new TypstToken(TypstTokenType.SPACE, c));
-                            }
-                        } else if (c === '\n') {
-                            this.queue.push(new TypstToken(TypstTokenType.SYMBOL, c));
-                        } else {
-                            throw new TypstWriterError(`Unexpected whitespace character: ${c}`, node);
-                        }
-                    }
-                    break;
-                } else {
-                    this.queue.push(node.head);
-                    break;
-                }
-            }
-            case 'group': {
-                const node = abstractNode as TypstGroup;
-                for (const item of node.items) {
-                    this.serialize(item);
-                }
-                break;
-            }
-            case 'leftright': {
-                const node = abstractNode as TypstLeftright;
-                const LR = new TypstToken(TypstTokenType.SYMBOL, 'lr');
-                const {left, right} = node;
-                if (node.head.eq(LR)) {
-                    this.queue.push(LR);
-                    this.queue.push(TYPST_LEFT_PARENTHESIS);
-                }
-                if (left) {
-                    this.queue.push(left);
-                }
-                this.serialize(node.body);
-                if (right) {
-                    this.queue.push(right);
-                }
-                if (node.head.eq(LR)) {
-                    this.queue.push(TYPST_RIGHT_PARENTHESIS);
-                }
-                break;
-            }
-            case 'supsub': {
-                const node = abstractNode as TypstSupsub;
-                let { base, sup, sub } = node;
-                this.appendWithBracketsIfNeeded(base);
-
-                let trailing_space_needed = false;
-                const has_prime = (sup && sup.head.eq(new TypstToken(TypstTokenType.ELEMENT, "'")));
-                if (has_prime) {
-                    // Put prime symbol before '_'. Because $y_1'$ is not displayed properly in Typst (so far)
-                    // e.g.
-                    // y_1' -> y'_1
-                    // y_{a_1}' -> y'_(a_1)
-                    this.queue.push(new TypstToken(TypstTokenType.ELEMENT, '\''));
-                    trailing_space_needed = false;
-                }
-                if (sub) {
-                    this.queue.push(new TypstToken(TypstTokenType.ELEMENT, '_'));
-                    trailing_space_needed = this.appendWithBracketsIfNeeded(sub);
-                }
-                if (sup && !has_prime) {
-                    this.queue.push(new TypstToken(TypstTokenType.ELEMENT, '^'));
-                    trailing_space_needed = this.appendWithBracketsIfNeeded(sup);
-                }
-                if (trailing_space_needed) {
-                    this.queue.push(SOFT_SPACE);
-                }
-                break;
-            }
-            case 'funcCall': {
-                const node = abstractNode as TypstFuncCall;
-                const func_symbol: TypstToken = node.head;
-                this.queue.push(func_symbol);
-                this.insideFunctionDepth++;
-                this.queue.push(TYPST_LEFT_PARENTHESIS);
-                for (let i = 0; i < node.args.length; i++) {
-                    this.serialize(node.args[i]);
-                    if (i < node.args.length - 1) {
-                        this.queue.push(new TypstToken(TypstTokenType.ELEMENT, ','));
-                    }
-                }
-                if (node.options) {
-                    for (const [key, value] of Object.entries(node.options)) {
-                        this.queue.push(new TypstToken(TypstTokenType.LITERAL, `, ${key}: ${value.toString()}`));
-                    }
-                }
-                this.queue.push(TYPST_RIGHT_PARENTHESIS);
-                this.insideFunctionDepth--;
-                break;
-            }
-            case 'fraction': {
-                const node = abstractNode as TypstFraction;
-                const [numerator, denominator] = node.args;
-                const pos = this.queue.length;
-                const no_wrap = this.appendWithBracketsIfNeeded(numerator);
-
-                // This is a dirty hack to force `C \frac{xy}{z}`to translate to `C (x y)/z` instead of `C(x y)/z`
-                // To solve this properly, we should implement a Typst formatter
-                const wrapped = !no_wrap;
-                if (wrapped) {
-                    this.queue.splice(pos, 0, SOFT_SPACE);
-                }
-
-                this.queue.push(new TypstToken(TypstTokenType.ELEMENT, '/'));
-                this.appendWithBracketsIfNeeded(denominator);
-                break;
-            }
-            case 'matrixLike': {
-                const node = abstractNode as TypstMatrixLike;
-                const matrix = node.matrix;
-
-                let cell_sep: TypstToken;
-                let row_sep: TypstToken;
-                if (node.head.eq(TypstMatrixLike.MAT)) {
-                    cell_sep = new TypstToken(TypstTokenType.ELEMENT, ',');
-                    row_sep = new TypstToken(TypstTokenType.ELEMENT, ';');
-                } else if (node.head.eq(TypstMatrixLike.CASES)) {
-                    cell_sep = new TypstToken(TypstTokenType.ELEMENT, '&');
-                    row_sep = new TypstToken(TypstTokenType.ELEMENT, ',');
-                } else if (node.head.eq(TypstToken.NONE)){ // head is null
-                    cell_sep = new TypstToken(TypstTokenType.ELEMENT, '&');
-                    row_sep = new TypstToken(TypstTokenType.SYMBOL, '\\');
-                }
-
-                if (!node.head.eq(TypstToken.NONE)) {
-                    this.queue.push(node.head);
-                    this.insideFunctionDepth++;
-                    this.queue.push(TYPST_LEFT_PARENTHESIS);
-                    if (node.options) {
-                        for (const [key, value] of Object.entries(node.options)) {
-                            this.queue.push(new TypstToken(TypstTokenType.LITERAL, `${key}: ${value.toString()}, `));
-                        }
-                    }
-                }
-
-                matrix.forEach((row, i) => {
-                    row.forEach((cell, j) => {
-                        this.serialize(cell);
-                        if (j < row.length - 1) {
-                            this.queue.push(cell_sep);
-                        } else {
-                            if (i < matrix.length - 1) {
-                                this.queue.push(row_sep);
-                            }
-                        }
-                    });
-                });
-
-                if (!node.head.eq(TypstToken.NONE)) {
-                    this.queue.push(TYPST_RIGHT_PARENTHESIS);
-                    this.insideFunctionDepth--;
-                }
-                break;
-            }
-            case 'markupFunc': {
-                const node = abstractNode as TypstMarkupFunc;
-                this.queue.push(node.head);
-                this.queue.push(TYPST_LEFT_PARENTHESIS);
-                if (node.options) {
-                    const entries = Object.entries(node.options);
-                    for (let i = 0; i < entries.length; i++) {
-                        const [key, value] = entries[i];
-                        this.queue.push(new TypstToken(TypstTokenType.LITERAL, `${key}: ${value.toString()}`));
-                        if (i < entries.length - 1) {
-                            this.queue.push(new TypstToken(TypstTokenType.ELEMENT, ','));
-                        }
-                    }
-                }
-                this.queue.push(TYPST_RIGHT_PARENTHESIS);
-
-                this.queue.push(new TypstToken(TypstTokenType.LITERAL, '['));
-                for (const frag of node.fragments) {
-                    this.queue.push(new TypstToken(TypstTokenType.LITERAL, '$'));
-                    this.serialize(frag);
-                    this.queue.push(new TypstToken(TypstTokenType.LITERAL, '$'));
-                }
-                this.queue.push(new TypstToken(TypstTokenType.LITERAL, ']'));
-
-                break;
-            }
-            default:
-                throw new TypstWriterError(`Unimplemented node type to append: ${abstractNode.type}`, abstractNode);
-        }
+        const env = {insideFunctionDepth: 0};
+        this.queue.push(...abstractNode.serialize(env, this.options));
     }
 
-    private appendWithBracketsIfNeeded(node: TypstNode): boolean {
-        let need_to_wrap = ['group', 'supsub', 'matrixLike', 'fraction','empty'].includes(node.type);
-
-        if (node.type === 'group') {
-            const group = node as TypstGroup;
-            if (group.items.length === 0) {
-                // e.g. TeX `P_{}` converts to Typst `P_()`
-                need_to_wrap = true;
-            } else {
-                const first = group.items[0];
-                const last = group.items[group.items.length - 1];
-                if (is_delimiter(first) && is_delimiter(last)) {
-                    need_to_wrap = false;
-                }
-            }
-        }
-
-        if (need_to_wrap) {
-            this.queue.push(TYPST_LEFT_PARENTHESIS);
-            this.serialize(node);
-            this.queue.push(TYPST_RIGHT_PARENTHESIS);
-        } else {
-            this.serialize(node);
-        }
-
-        return !need_to_wrap;
-    }
 
     protected flushQueue() {
-        const dummy_token = new TypstToken(TypstTokenType.SYMBOL, '');
+        // merge consecutive soft spaces
+        let qu: TypstToken[] = [];
+        for(const token of this.queue) {
+            if (token.eq(SOFT_SPACE) && qu.length > 0 && qu[qu.length - 1].eq(SOFT_SPACE)) {
+                continue;
+            }
+            qu.push(token);
+        }
 
         // delete soft spaces if they are not needed
-        for(let i = 0; i < this.queue.length; i++) {
-            let token = this.queue[i];
+        const dummy_token = new TypstToken(TypstTokenType.SYMBOL, '');
+        for(let i = 0; i < qu.length; i++) {
+            let token = qu[i];
             if (token.eq(SOFT_SPACE)) {
                 const to_delete = (i === 0)
-                                || (i === this.queue.length - 1)
-                                || (this.queue[i - 1].type === TypstTokenType.SPACE)
-                                || this.queue[i - 1].isOneOf([TYPST_LEFT_PARENTHESIS, TYPST_NEWLINE])
-                                || this.queue[i + 1].isOneOf([TYPST_RIGHT_PARENTHESIS, TYPST_COMMA, TYPST_NEWLINE]);
+                                || (i === qu.length - 1)
+                                || (qu[i - 1].type === TypstTokenType.SPACE)
+                                || qu[i - 1].isOneOf([TYPST_LEFT_PARENTHESIS, TYPST_NEWLINE])
+                                || qu[i + 1].isOneOf([TYPST_RIGHT_PARENTHESIS, TYPST_COMMA, TYPST_NEWLINE]);
                 if (to_delete) {
-                    this.queue[i] = dummy_token;
+                    qu[i] = dummy_token;
                 }
             }
         }
 
-        this.queue = this.queue.filter((token) => !token.eq(dummy_token));
+        qu = qu.filter((token) => !token.eq(dummy_token));
 
-        for(let i = 0; i < this.queue.length; i++) {
-            let token = this.queue[i];
-            let previous_token = i === 0 ? null : this.queue[i - 1];
+        for(let i = 0; i < qu.length; i++) {
+            let token = qu[i];
+            let previous_token = i === 0 ? null : qu[i - 1];
             this.writeBuffer(previous_token, token);
         }
 
@@ -391,7 +145,7 @@ export class TypstWriter {
             res = res.replace(/round\(\)/g, 'round("")');
             return res;
         }
-        if (this.optimize) {
+        if (this.options.optimize) {
             const all_passes = [smartFloorPass, smartCeilPass, smartRoundPass];
             for (const pass of all_passes) {
                 this.buffer = pass(this.buffer);

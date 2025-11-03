@@ -1,6 +1,6 @@
 {
   "name": "tex2typst",
-  "version": "0.3.26",
+  "version": "0.3.27",
   "description": "JavaScript library for converting TeX code to Typst",
   "type": "module",
   "main": "dist/index.js",

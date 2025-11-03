@@ -188,6 +188,41 @@ function convert_tex_array_align_literal(alignLiteral: string): TypstNamedParams
     return np;
 }
 
+const TYPST_LEFT_PARENTHESIS: TypstToken = new TypstToken(TypstTokenType.ELEMENT, '(');
+const TYPST_RIGHT_PARENTHESIS: TypstToken = new TypstToken(TypstTokenType.ELEMENT, ')');
+
+function is_delimiter(c: TypstNode): boolean {
+    return c.head.type === TypstTokenType.ELEMENT && ['(', ')', '[', ']', '{', '}', '|', '⌊', '⌋', '⌈', '⌉'].includes(c.head.value);
+}
+
+function appendWithBracketsIfNeeded(node: TypstNode): TypstNode {
+    let need_to_wrap = ['group', 'supsub', 'matrixLike', 'fraction','empty'].includes(node.type);
+
+    if (node.type === 'group') {
+        const group = node as TypstGroup;
+        if (group.items.length === 0) {
+            // e.g. TeX `P_{}` converts to Typst `P_()`
+            need_to_wrap = true;
+        } else {
+            const first = group.items[0];
+            const last = group.items[group.items.length - 1];
+            if (is_delimiter(first) && is_delimiter(last)) {
+                need_to_wrap = false;
+            }
+        }
+    }
+
+    if (need_to_wrap) {
+        return new TypstLeftright(null, {
+            left: TYPST_LEFT_PARENTHESIS,
+            right: TYPST_RIGHT_PARENTHESIS,
+            body: node,
+
+        });
+    } else {
+        return node;
+    }
+}
 
 export function convert_tex_node_to_typst(abstractNode: TexNode, options: Tex2TypstOptions = {}): TypstNode {
     switch (abstractNode.type) {
@@ -233,6 +268,14 @@ export function convert_tex_node_to_typst(abstractNode: TexNode, options: Tex2Ty
                 sup: sup? convert_tex_node_to_typst(sup, options) : null,
                 sub: sub? convert_tex_node_to_typst(sub, options) : null,
             };
+
+            data.base = appendWithBracketsIfNeeded(data.base);
+            if (data.sup) {
+                data.sup = appendWithBracketsIfNeeded(data.sup);
+            }
+            if (data.sub) {
+                data.sub = appendWithBracketsIfNeeded(data.sub);
+            }
 
             return new TypstSupsub(data);
         }
@@ -348,10 +391,18 @@ export function convert_tex_node_to_typst(abstractNode: TexNode, options: Tex2Ty
                 return res;
             }
 
-            // \substack{a \\ b} -> `a \ b`
+            // \substack{a \\ b} -> a \ b
             // as in translation from \sum_{\substack{a \\ b}} to sum_(a \ b)
             if (node.head.value === '\\substack') {
                 return arg0;
+            }
+
+            // \set{a, b, c} -> {a, b, c}
+            if (node.head.value === '\\set') {
+                return new TypstLeftright(
+                    null,
+                    { body: arg0, left: TypstToken.LEFT_BRACE, right: TypstToken.RIGHT_BRACE }
+                );
             }
 
             if (node.head.value === '\\overset') {
@@ -364,7 +415,7 @@ export function convert_tex_node_to_typst(abstractNode: TexNode, options: Tex2Ty
             // \frac{a}{b} -> a / b
             if (node.head.value === '\\frac') {
                 if (options.fracToSlash) {
-                    return new TypstFraction(node.args.map((n) => convert_tex_node_to_typst(n, options)));
+                    return new TypstFraction(node.args.map((n) => convert_tex_node_to_typst(n, options)).map(appendWithBracketsIfNeeded));
                 }
             }
 

@@ -19,10 +19,10 @@ cases:
     typst: 'lr([bold(A))) lr({b))'
   - title: dot as right bracket
     tex: '\left\{ \frac{a}{b} \right.'
-    typst: 'lr(\{a/b)'
+    typst: 'lr(\{ a/b)'
   - title: dot as left bracket
     tex: '\left. \frac{a}{b} \right\}'
-    typst: 'lr(a/b})'
+    typst: 'lr(a/b })'
   - title: left. and right.
     tex: '\left. \frac{a}{b} \right.'
     typst: 'lr(a/b)'
@@ -31,7 +31,7 @@ cases:
     typst: lr(|a + 1/3|)^2
   - title: biglr
     tex: \bigl|a + \frac{1}{3} \bigr|^2
-    typst: "|a + 1/3|^2"
+    typst: "|a + 1/3 |^2"
   - title: bigm
     tex: \dfrac{d}{dx}x^2\bigm{|}_{x=2}
     typst: frac(d, d x) x^2 |_(x = 2)
@@ -40,7 +40,7 @@ cases:
     typst: limits(integral)_0^infinity x "d" x
   - title: bigglr
     tex: \biggl|a + \frac{1}{3} \biggr|^2
-    typst: "|a + 1/3|^2"
+    typst: "|a + 1/3 |^2"
   - title: symmetry left right
     tex: \left\{ a \right\} \left( b \right) \left[ c \right]
     typst: '{a}(b) [c]'
@@ -121,7 +121,7 @@ cases:
       "diag"(bold(G) bold(psi)^(n + 1))
       (diff bold(k)_(A v))/(diff bold(psi)^(n + 1))
       - bold(D)
-      "diag"(bold(k)_(A v)(bold(psi)^(n + 1) comma bold(m)))
+      "diag"(bold(k)_(A v) (bold(psi)^(n + 1) comma bold(m)))
       bold(G)
       - bold(G)_z
       (diff bold(k)_(A v))/(diff bold(psi)^(n + 1))
@@ -132,10 +132,10 @@ cases:
       +
       underbrace(
       [
-      -1/(Delta t)
+      - 1/(Delta t)
       (diff bold(theta)^n)/(diff bold(psi)^n)
       ]
-      , bold(A)_(-1)(bold(psi)^n))
+      , bold(A)_(-1) (bold(psi)^n))
       (diff bold(psi)^n)/(diff bold(m))
       =
       underbrace(
@@ -287,10 +287,10 @@ cases:
     typst: lim_(x -> 0) sum_(i = 1)^n
   - title: spaces around text
     tex: i_D = \mu_n C_\text{ox} \frac{W}{L} \left[ (v_\text{GS} - V_t)v_\text{DS} - \frac{1}{2} v_\text{DS}^2 \right]
-    typst: i_D = mu_n C_"ox" W/L [(v_"GS" - V_t) v_"DS" - 1/2 v_"DS"^2 ]
+    typst: i_D = mu_n C_"ox" W/L [(v_"GS" - V_t) v_"DS" - 1/2 v_"DS"^2]
   - title: base is group wrapped in brackets
     tex: e = \lim_{{n \to \infty}} \left(1 + \frac{1}{n}\right)^n
-    typst: e = lim_(n -> infinity)(1 + 1/n)^n
+    typst: e = lim_(n -> infinity) (1 + 1/n)^n
 
   - title: oo
     tex: \infty
@@ -416,6 +416,10 @@ cases:
   - title: parenthesis in fraction
     tex: C \frac{xy}{z}
     typst: C (x y)/z
+  # this test the typst formatter. Old bad implementation translated it to "1/3(x + y)"
+  - title: parenthesis after fraction
+    tex: \frac{1}{3} (x + y)
+    typst: 1/3 (x + y)
   - title: substack
     tex: \sum_{\substack{0 \leq i \leq m \\ 0 < j < n}} P(i, j)
     typst: sum_(0 <= i <= m \ 0 < j < n) P(i, j)
@@ -431,3 +435,9 @@ cases:
   - title: subarray-with-rr &
     tex: \sum_{\begin{subarray}{rr} a & b \\ c & d \end{subarray}} P(i, j)
     typst: sum_(a & b \ c & d) P(i, j)
+  - title: command set
+    tex: \set{a, b, c}
+    typst: "{a, b, c}"
+  - title: command set, empty
+    tex: \set{}
+    typst: "{}"
