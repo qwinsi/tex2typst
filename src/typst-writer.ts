@@ -46,6 +46,8 @@ export class TypstWriter {
         no_need_space ||= /[\(\[\|]$/.test(this.buffer) && /^\w/.test(str);
         // closing a clause
         no_need_space ||= /^[})\]\|]$/.test(str);
+        // closing with double bar (only after letters or closing delimiters)
+        no_need_space ||= str === '||' && /[\w}\)\]]$/.test(this.buffer);
         // putting the opening '(' for a function
         no_need_space ||= /[^=]$/.test(this.buffer) && str === '(';
         // putting punctuation

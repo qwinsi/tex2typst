@@ -221,11 +221,38 @@ export function convert_tex_node_to_typst(abstractNode: TexNode, options: Tex2Ty
             const node = abstractNode as TexText;
             return new TypstToken(TypstTokenType.TEXT, node.head.value).toNode();
         }
-        case 'ordgroup':
+        case 'ordgroup': {
             const node = abstractNode as TexGroup;
+
+            // Special handling for groups starting with font-switching commands
+            // e.g., {\rm det} should become upright(d e t), not upright(d) e t
+            // This handles old-style TeX font declarations where \rm only grabbed one letter
+            const FONT_SWITCH_COMMANDS = ['\\rm', '\\bf', '\\it', '\\sf', '\\tt'];
+            if (node.items.length > 1 &&
+                node.items[0].type === 'funcCall' &&
+                FONT_SWITCH_COMMANDS.includes((node.items[0] as TexFuncCall).head.value)) {
+
+                const fontCmd = node.items[0] as TexFuncCall;
+                // Only merge if the font command has a single terminal argument (one character)
+                // AND all remaining items are also simple terminals
+                const isSingleCharArg = fontCmd.args.length === 1 &&
+                    fontCmd.args[0].type === 'terminal';
+                const allRemainingAreTerminals = node.items.slice(1).every(
+                    item => item.type === 'terminal'
+                );
+
+                if (isSingleCharArg && allRemainingAreTerminals) {
+                    // Merge the font command's argument with all remaining terminals into a group
+                    const allContent = [...fontCmd.args, ...node.items.slice(1)];
+                    const mergedFontCmd = new TexFuncCall(fontCmd.head, [new TexGroup(allContent)], fontCmd.data);
+                    return convert_tex_node_to_typst(mergedFontCmd, options);
+                }
+            }
+
             return new TypstGroup(
                 node.items.map((n) => convert_tex_node_to_typst(n, options))
             );
+        }
         case 'supsub': {
             const node = abstractNode as TexSupSub;
             let { base, sup, sub } = node;

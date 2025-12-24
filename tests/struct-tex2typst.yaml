@@ -473,6 +473,18 @@ cases:
   - title: frac with partial parentheses needs wrapping (denominator)
     tex: \frac{a}{(b + c)d}
     typst: a/((b + c) d)
+  - title: absolute value bars
+    tex: \left\vert \frac{1}{{\rm det}T_{0}} \right\vert
+    typst: lr(bar.v 1/(upright(d e t) T_0) bar.v)
+  - title: double absolute value bars
+    tex: \left\Vert \frac{1}{{\rm det}T_{0}} \right\Vert
+    typst: lr(bar.v.double 1/(upright(d e t) T_0) bar.v.double)
+  - title: combined absolute value bars
+    tex: \lvert a \rvert + \lVert b \rVert
+    typst: '|a| + ||b||'
+  - title: rm text style
+    tex: \rm abc
+    typst: upright(a b c)
   - title: medspace
     tex: a \> b
     typst: a med b

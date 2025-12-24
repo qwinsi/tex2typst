@@ -42,7 +42,7 @@ function eat_parenthesis(tokens: TexToken[], start: number): TexToken | null {
     const firstToken = tokens[start];
     if (firstToken.type === TexTokenType.ELEMENT && ['(', ')', '[', ']', '|', '\\{', '\\}', '.', '\\|'].includes(firstToken.value)) {
         return firstToken;
-    } else if (firstToken.type === TexTokenType.COMMAND && ['lfloor', 'rfloor', 'lceil', 'rceil', 'langle', 'rangle', 'lparen', 'rparen', 'lbrace', 'rbrace'].includes(firstToken.value.slice(1))) {
+    } else if (firstToken.type === TexTokenType.COMMAND && ['lfloor', 'rfloor', 'lceil', 'rceil', 'langle', 'rangle', 'lparen', 'rparen', 'lbrace', 'rbrace', 'vert', 'Vert', 'lvert', 'rvert', 'lVert', 'rVert'].includes(firstToken.value.slice(1))) {
         return firstToken;
     } else {
         return null;
