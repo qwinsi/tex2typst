@@ -87,7 +87,7 @@ const rules_map = new Map<string, (a: Scanner<TexToken>) => TexToken | TexToken[
         }
     ],
     [
-        String.raw`\\(text|operatorname\*?|textcolor|begin|end|hspace|array){(.+?)}`, (s) => {
+        String.raw`\\(text|operatorname\*?|textcolor|begin|end|hspace|array)\s*{(.+?)}`, (s) => {
             const match = s.reMatchArray()!;
             return [
                 new TexToken(TexTokenType.COMMAND, '\\' + match[1]),

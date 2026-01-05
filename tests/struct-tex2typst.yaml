@@ -499,3 +499,9 @@ cases:
   - title: mod, bmod, pmod
     tex: a \mod b + a \bmod b + a \pmod b
     typst: a mod b + a mod b + a (mod b)
+  - title: text case 1
+    tex: a\text {This is a test.}a
+    typst: a "This is a test." a
+  - title: text case 2
+    tex: a\text       {This is a test.}a
+    typst: a "This is a test." a
