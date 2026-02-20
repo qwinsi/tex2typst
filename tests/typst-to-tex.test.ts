@@ -69,6 +69,16 @@ describe('examples', () => {
     });
 });
 
+describe('shorthands', () => {
+    test('<->', function () {
+        const typst_node = parseTypst('<->');
+        const tex_node = convert_typst_node_to_tex(typst_node, options);
+        const writer = new TexWriter();
+        writer.append(tex_node);
+        const res = writer.finalize();
+        expect(res).toEqual('\\leftrightarrow');
+    });
+});
 
 
 describe('struct-typst2tex.yaml', function () {

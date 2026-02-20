@@ -19,6 +19,7 @@ const shorthandMap = new Map<string, string>([
     ['dots.h', '...'],
     ['gt.triple', '>>>'],
     ['lt.triple', '<<<'],
+    ['arrow.l.r', '<->'], // Typst's documentation doesn't include this. Wondering why
     ['arrow.r', '->'],
     ['arrow.r.double', '=>'],
     ['arrow.r.squiggly', '~>'],
@@ -38,8 +39,6 @@ const shorthandMap = new Map<string, string>([
     ['minus', '-'],
     ['tilde.op', '~'],
 
-    // Typst's documentation doesn't include this. Wondering why
-    ['arrow.l.r', '<->'],
 ]);
 
 
