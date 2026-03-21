@@ -670,7 +670,7 @@ const TYPST_BINARY_FUNCTIONS: string[] = [
 ];
 */
 
-function typst_token_to_tex(token: TypstToken): TexToken {
+function typst_token_to_tex(token: TypstToken, env: 'func-name' | 'other' = 'other'): TexToken {
     switch (token.type) {
         case TypstTokenType.NONE:
             // e.g. Typst `#none^2` is converted to TeX `^2`
@@ -686,6 +686,9 @@ function typst_token_to_tex(token: TypstToken): TexToken {
                         return '-';
                     case 'percent':
                         return '%';
+                    case 'dot': {
+                        return (env === 'func-name') ? '\\dot' : '\\cdot';
+                    }
                     default: {
                         if (reverseSymbolMap.has(symbol)) {
                             return '\\' + reverseSymbolMap.get(symbol);
@@ -936,7 +939,7 @@ export function convert_typst_node_to_tex(abstractNode: TypstNode, options: Typs
                 }
                 // general case
                 default: {
-                    const func_name_tex = typst_token_to_tex(node.head);
+                    const func_name_tex = typst_token_to_tex(node.head, 'func-name');
                     const is_known_func = TEX_UNARY_COMMANDS.includes(func_name_tex.value.substring(1))
                                             || TEX_BINARY_COMMANDS.includes(func_name_tex.value.substring(1));
                     if (func_name_tex.value.length > 0 && is_known_func) {

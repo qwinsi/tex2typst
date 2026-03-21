@@ -417,3 +417,6 @@ cases:
   - title: legacy diff
     tex: \partial x
     typst: diff x
+  - title: dot to \cdot, dot(A) to \dot{A}
+    tex: \cdot \dot{A}
+    typst: dot dot(A)
