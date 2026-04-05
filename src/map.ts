@@ -52,7 +52,6 @@ const symbolMap = new Map<string, string>([
     ['neq', 'eq.not'],
     ['dot', 'dot'],
     ['ddot', 'dot.double'],
-    ['doteq', 'dot(eq)'],
     ['dots', 'dots.h'],
     ['vdots', 'dots.v'],
     ['ddots', 'dots.down'],
@@ -1136,7 +1135,6 @@ const reverseSymbolMap = new Map<string, string>();
 for(const [key, value] of Array.from(symbolMap.entries()).reverse()) {
     reverseSymbolMap.set(value, key);
 }
-reverseSymbolMap.set('oo', 'infty');
 
 // force override some one-to-multiple mappings
 const typst_to_tex_map = new Map<string, string>([

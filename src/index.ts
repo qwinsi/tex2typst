@@ -8,6 +8,7 @@ import { parseTypst } from "./typst-parser";
 import { TexWriter } from "./tex-writer";
 import { shorthandMap } from "./typst-shorthands";
 import { expand_tex_predefined_macros } from "./tex-semantic-analysis";
+import { expand_typst_predefined_variables } from "./typst-semantic-analyais";
 
 
 export function tex2typst(tex: string, options: Partial<Tex2TypstOptions> = {}): string {
@@ -53,7 +54,8 @@ export function typst2tex(typst: string, options: Partial<Typst2TexOptions> = {}
     }
 
     const typstTree = parseTypst(typst);
-    const texTree = convert_typst_node_to_tex(typstTree, opt);
+    const preprocessedTypstTree = expand_typst_predefined_variables(typstTree);
+    const texTree = convert_typst_node_to_tex(preprocessedTypstTree, opt);
     const writer = new TexWriter();
     writer.append(texTree);
     return writer.finalize();

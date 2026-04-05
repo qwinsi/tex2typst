@@ -127,3 +127,6 @@ cases:
   - title: Italic Greek capital letters
     tex: \varGamma \varDelta \varSigma
     typst: italic(Gamma) italic(Delta) italic(Sigma)
+  - title: doteq
+    tex: \doteq
+    typst: dot(=)

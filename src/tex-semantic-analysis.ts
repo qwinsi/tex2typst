@@ -1,5 +1,5 @@
 import { parseTex } from "./tex-parser";
-import { TexNode, TexTerminal, TexToken, TexTokenType } from "./tex-types";
+import { TexNode, TexTokenType } from "./tex-types";
 
 const TEX_PREDEFINED_MACROS: Map<string, string> = new Map([
 // https://github.com/KaTeX/KaTeX/blob/434d4b8aef4c3311ebfd3405a9f0cce18ead953b/src/macros.ts#L351-L367
@@ -14,6 +14,8 @@ const TEX_PREDEFINED_MACROS: Map<string, string> = new Map([
     ["\\varPhi", "\\mathit{\\Phi}"],
     ["\\varPsi", "\\mathit{\\Psi}"],
     ["\\varOmega", "\\mathit{\\Omega}"],
+
+    ["\\doteq", "\\dot{=}"],
 ]);
 
 function _expand_tex_predefined_macros(node: TexNode): TexNode {

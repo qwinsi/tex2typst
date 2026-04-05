@@ -150,6 +150,9 @@ export abstract class TypstNode {
     // Serialize a tree of TypstNode into a list of TypstToken
     abstract serialize(env: TypstWriterEnvironment, options: TypstWriterOptions): TypstToken[];
 
+    abstract bottomTopTraversalTransform(transform: (node: TypstNode) => TypstNode): TypstNode;
+
+
     public setOptions(options: TypstNamedParams) {
         this.options = options;
     }
@@ -246,6 +249,10 @@ export class TypstTerminal extends TypstNode {
         }
         return [this.head];
     }
+
+    public bottomTopTraversalTransform(transform: (node: TypstNode) => TypstNode): TypstNode {
+        return transform(this);
+    }
 }
 
 class TypstTokenQueue {
@@ -340,6 +347,11 @@ export class TypstGroup extends TypstNode {
         }
         return queue;
     }
+
+    public bottomTopTraversalTransform(transform: (node: TypstNode) => TypstNode): TypstNode {
+        const g = new TypstGroup(this.items.map((n) => n.bottomTopTraversalTransform(transform)));
+        return transform(g);
+    }
 }
 
 
@@ -392,6 +404,15 @@ export class TypstSupsub extends TypstNode {
         }
         return queue;
     }
+
+    public bottomTopTraversalTransform(transform: (node: TypstNode) => TypstNode): TypstNode {
+        const s = new TypstSupsub({
+            base: this.base.bottomTopTraversalTransform(transform),
+            sup: this.sup?.bottomTopTraversalTransform(transform) || null,
+            sub: this.sub?.bottomTopTraversalTransform(transform) || null
+        });
+        return transform(s);
+    }
 }
 
 export class TypstFuncCall extends TypstNode {
@@ -439,6 +460,12 @@ export class TypstFuncCall extends TypstNode {
         env.insideFunctionDepth--;
         return queue;
     }
+
+    public bottomTopTraversalTransform(transform: (node: TypstNode) => TypstNode): TypstNode {
+        const f = new TypstFuncCall(this.head, this.args.map((n) => n.bottomTopTraversalTransform(transform)));
+        f.options = this.options;
+        return transform(f);
+    }
 }
 
 export class TypstFraction extends TypstNode {
@@ -469,6 +496,11 @@ export class TypstFraction extends TypstNode {
         queue.push(new TypstToken(TypstTokenType.ELEMENT, '/'));
         queue.push(...denominator.serialize(env, options));
         return queue;
+    }
+
+    public bottomTopTraversalTransform(transform: (node: TypstNode) => TypstNode): TypstNode {
+        const f = new TypstFraction(this.args.map((n) => n.bottomTopTraversalTransform(transform)));
+        return transform(f);
     }
 }
 
@@ -528,6 +560,16 @@ export class TypstLeftright extends TypstNode {
             queue.push(TYPST_RIGHT_PARENTHESIS);
         }
         return queue;
+    }
+
+
+    public bottomTopTraversalTransform(transform: (node: TypstNode) => TypstNode): TypstNode {
+        const l = new TypstLeftright(this.head, {
+            body: this.body.bottomTopTraversalTransform(transform),
+            left: this.left,
+            right: this.right,
+        });
+        return transform(l);
     }
 }
 
@@ -609,6 +651,13 @@ export class TypstMatrixLike extends TypstNode {
         return queue;
     }
 
+    public bottomTopTraversalTransform(transform: (node: TypstNode) => TypstNode): TypstNode {
+        const m = this.matrix.map((row) => row.map((cell) => cell.bottomTopTraversalTransform(transform)));
+        const ml = new TypstMatrixLike(this.head, m);
+        ml.options = this.options;
+        return transform(ml);
+    }
+
     static readonly MAT = new TypstToken(TypstTokenType.SYMBOL, 'mat');
     static readonly CASES = new TypstToken(TypstTokenType.SYMBOL, 'cases');
 }
@@ -666,5 +715,11 @@ export class TypstMarkupFunc extends TypstNode {
         }
         queue.push(new TypstToken(TypstTokenType.LITERAL, ']'));
         return queue;
+    }
+
+    public bottomTopTraversalTransform(transform: (node: TypstNode) => TypstNode): TypstNode {
+        const mf = new TypstMarkupFunc(this.head, this.fragments.map((n) => n.bottomTopTraversalTransform(transform)));
+        mf.options = this.options;
+        return transform(mf);
     }
 }

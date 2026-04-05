@@ -752,25 +752,6 @@ export function convert_typst_node_to_tex(abstractNode: TypstNode, options: Typs
         case 'terminal': {
             const node = abstractNode as TypstTerminal;
             if (node.head.type === TypstTokenType.SYMBOL) {
-                // special hook for eq.def
-                if (node.head.value === 'eq.def') {
-                    return new TexFuncCall(new TexToken(TexTokenType.COMMAND, '\\overset'), [
-                        new TexText(new TexToken(TexTokenType.LITERAL, 'def')),
-                        new TexToken(TexTokenType.ELEMENT, '=').toNode()
-                    ]);
-                }
-                // special hook for comma
-                if(node.head.value === 'comma') {
-                    return new TexToken(TexTokenType.ELEMENT, ',').toNode();
-                }
-                // special hook for dif
-                if(node.head.value === 'dif') {
-                    return new TexFuncCall(new TexToken(TexTokenType.COMMAND, '\\mathrm'), [new TexToken(TexTokenType.ELEMENT, 'd').toNode()]);
-                }
-                // special hook for hyph and hyph.minus
-                if(node.head.value === 'hyph' || node.head.value === 'hyph.minus') {
-                    return new TexText(new TexToken(TexTokenType.LITERAL, '-'));
-                }
                 // special hook for mathbb{R} <-- RR
                 if(/^([A-Z])\1$/.test(node.head.value)) {
                     return new TexFuncCall(new TexToken(TexTokenType.COMMAND, '\\mathbb'), [

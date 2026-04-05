@@ -6,6 +6,7 @@ import { convert_typst_node_to_tex } from '../src/convert';
 import { loadTestCases, TestCase  } from './test-common';
 import { Typst2TexOptions } from '../src/exposed-types';
 import { typst2tex } from '../src';
+import { expand_typst_predefined_variables } from '../src/typst-semantic-analyais';
 
 const options: Typst2TexOptions = {
     blockMathMode: true,
@@ -13,38 +14,22 @@ const options: Typst2TexOptions = {
 
 describe('examples', () => {
     test('a + b', function () {
-        const typst_node = parseTypst('a + b');
-        const tex_node = convert_typst_node_to_tex(typst_node, options);
-        const writer = new TexWriter();
-        writer.append(tex_node);
-        const res = writer.finalize();
+        const res = typst2tex('a + b', options);
         expect(res).toEqual('a + b');
     });
 
     test('sqrt(x)', function () {
-        const typst_node = parseTypst('sqrt(x)');
-        const tex_node = convert_typst_node_to_tex(typst_node, options);
-        const writer = new TexWriter();
-        writer.append(tex_node);
-        const res = writer.finalize();
+        const res = typst2tex('sqrt(x)', options);
         expect(res).toEqual('\\sqrt{x}');
     });
 
     test('integral_a^b f(x) dif x', function () {
-        const typst_node = parseTypst('integral_a^b f(x) dif x');
-        const tex_node = convert_typst_node_to_tex(typst_node, options);
-        const writer = new TexWriter();
-        writer.append(tex_node);
-        const res = writer.finalize();
+        const res = typst2tex('integral_a^b f(x) dif x', options);
         expect(res).toEqual('\\int_a^b f(x) \\mathrm{d} x');
     });
 
     test('lr({a + 1/3))', function () {
-        const typst_node = parseTypst('lr({a + 1/3))');
-        const tex_node = convert_typst_node_to_tex(typst_node, options);
-        const writer = new TexWriter();
-        writer.append(tex_node);
-        const res = writer.finalize();
+        const res = typst2tex('lr({a + 1/3))', options);
         expect(res).toEqual('\\left\\{a + \\frac{1}{3} \\right)');
     });
 
@@ -80,11 +65,7 @@ describe('struct-typst2tex.yaml', function () {
     const suite = loadTestCases('struct-typst2tex.yaml');
     suite.cases.forEach((c: TestCase) => {
         test(c.title, function () {
-            const typst_node = parseTypst(c.typst);
-            const tex_node = convert_typst_node_to_tex(typst_node, options);
-            const writer = new TexWriter();
-            writer.append(tex_node);
-            const res = writer.finalize();
+            const res = typst2tex(c.typst, options);
             expect(res).toEqual(c.tex);
         });
     });
@@ -94,11 +75,7 @@ describe('struct-bidirection.yaml', function () {
     const suite = loadTestCases('struct-bidirection.yaml');
     suite.cases.forEach((c: TestCase) => {
         test(c.title, function () {
-            const typst_node = parseTypst(c.typst);
-            const tex_node = convert_typst_node_to_tex(typst_node, options);
-            const writer = new TexWriter();
-            writer.append(tex_node);
-            const res = writer.finalize();
+            const res = typst2tex(c.typst, options);
             expect(res).toEqual(c.tex);
         });
     });
