@@ -85,6 +85,7 @@ export abstract class TexNode {
     }
 
     abstract serialize(): TexToken[];
+    abstract bottomTopTraversalTransform(operationFn: (n: TexNode) => TexNode): TexNode;
 
     // Note: toString() is expensive. Do not use it on performance-critical code path.
     public toString(): string {
@@ -129,6 +130,10 @@ export class TexTerminal extends TexNode {
                 throw new Error(`Unknown terminal token type: ${this.head.type}`);
         }
     }
+
+    public bottomTopTraversalTransform(operationFn: (n: TexNode) => TexNode): TexNode {
+        return operationFn(this);
+    }
 }
 
 export class TexText extends TexNode {
@@ -146,6 +151,10 @@ export class TexText extends TexNode {
             new TexToken(TexTokenType.ELEMENT, '}'),
         ];
     }
+
+    public bottomTopTraversalTransform(operationFn: (n: TexNode) => TexNode): TexNode {
+        return operationFn(this);
+    }
 }
 
 export class TexGroup extends TexNode {
@@ -157,6 +166,11 @@ export class TexGroup extends TexNode {
 
     public serialize(): TexToken[] {
         return this.items.map((n) => n.serialize()).flat();
+    }
+
+    public bottomTopTraversalTransform(operationFn: (n: TexNode) => TexNode): TexNode {
+        const g = new TexGroup(this.items.map((n) => n.bottomTopTraversalTransform(operationFn)));
+        return operationFn(g);
     }
 }
 
@@ -211,6 +225,15 @@ export class TexSupSub extends TexNode {
         }
         return tokens;
     }
+
+    public bottomTopTraversalTransform(operationFn: (n: TexNode) => TexNode): TexNode {
+        const s = new TexSupSub({
+            base: this.base.bottomTopTraversalTransform(operationFn),
+            sup: this.sup? this.sup.bottomTopTraversalTransform(operationFn): null,
+            sub: this.sub? this.sub.bottomTopTraversalTransform(operationFn): null,
+        });
+        return operationFn(s);
+    }
 }
 
 export class TexFuncCall extends TexNode {
@@ -244,6 +267,11 @@ export class TexFuncCall extends TexNode {
 
         return tokens;
     }
+
+    public bottomTopTraversalTransform(operationFn: (n: TexNode) => TexNode): TexNode {
+        const f = new TexFuncCall(this.head, this.args.map((n) => n.bottomTopTraversalTransform(operationFn)), this.data);
+        return operationFn(f);
+    }
 }
 
 export class TexLeftRight extends TexNode {
@@ -266,6 +294,15 @@ export class TexLeftRight extends TexNode {
         tokens.push(new TexToken(TexTokenType.COMMAND, '\\right'));
         tokens.push(new TexToken(TexTokenType.ELEMENT, this.right? this.right.value: '.'));
         return tokens;
+    }
+
+    public bottomTopTraversalTransform(operationFn: (n: TexNode) => TexNode): TexNode {
+        const l = new TexLeftRight({
+            body: this.body.bottomTopTraversalTransform(operationFn),
+            left: this.left,
+            right: this.right,
+        });
+        return operationFn(l);
     }
 }
 
@@ -310,6 +347,13 @@ export class TexBeginEnd extends TexNode {
         tokens = tokens.concat(this.head);
         tokens.push(new TexToken(TexTokenType.ELEMENT, '}'));
         return tokens;
+    }
+
+    public bottomTopTraversalTransform(operationFn: (n: TexNode) => TexNode): TexNode {
+        const m = this.matrix.map((row) => row.map((cell) => cell.bottomTopTraversalTransform(operationFn)));
+        const d = this.data? this.data.bottomTopTraversalTransform(operationFn): null;
+        const be = new TexBeginEnd(this.head, m, d);
+        return operationFn(be);
     }
 }
 

@@ -7,6 +7,7 @@ import { symbolMap } from "./map";
 import { parseTypst } from "./typst-parser";
 import { TexWriter } from "./tex-writer";
 import { shorthandMap } from "./typst-shorthands";
+import { expand_tex_predefined_macros } from "./tex-semantic-analysis";
 
 
 export function tex2typst(tex: string, options: Partial<Tex2TypstOptions> = {}): string {
@@ -30,7 +31,8 @@ export function tex2typst(tex: string, options: Partial<Tex2TypstOptions> = {}):
     }
 
     const texTree = parseTex(tex, opt.customTexMacros!);
-    const typstTree = convert_tex_node_to_typst(texTree, opt);
+    const preprocessedTexTree = expand_tex_predefined_macros(texTree);
+    const typstTree = convert_tex_node_to_typst(preprocessedTexTree, opt);
     const writer = new TypstWriter(opt as TypstWriterOptions);
     writer.serialize(typstTree);
     return writer.finalize();

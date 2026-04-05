@@ -124,3 +124,6 @@ cases:
     tex: \leadsto
     typst: ~>
     preferShorthands: true
+  - title: Italic Greek capital letters
+    tex: \varGamma \varDelta \varSigma
+    typst: italic(Gamma) italic(Delta) italic(Sigma)
