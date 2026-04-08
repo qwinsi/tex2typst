@@ -1,7 +1,7 @@
 import { TypstToken } from "./typst-types";
 import { TypstTokenType } from "./typst-types";
 import { reverseShorthandMap } from "./typst-shorthands";
-import { JSLex, Scanner } from "./jslex";
+import { JSLex, Scanner, ScannerCallback } from "./jslex";
 
 const TYPST_SHORTHANDS = Array.from(reverseShorthandMap.keys());
 
@@ -20,7 +20,7 @@ function generate_regex_for_shorthands(): string {
 
 const REGEX_SHORTHANDS = generate_regex_for_shorthands();
 
-const rules_map = new Map<string, (a: Scanner<TypstToken>) => TypstToken | TypstToken[]>([
+const rules_map = new Map<string, ScannerCallback<TypstToken>>([
     [String.raw`//[^\n]*`, (s) => new TypstToken(TypstTokenType.COMMENT, s.text()!.substring(2))],
     [String.raw`/`, (s) => new TypstToken(TypstTokenType.ELEMENT, s.text()!)],
     [String.raw`[_^&]`, (s) => new TypstToken(TypstTokenType.CONTROL, s.text()!)],

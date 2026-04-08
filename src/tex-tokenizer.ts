@@ -1,5 +1,5 @@
 import { TexToken, TexTokenType } from "./tex-types";
-import { JSLex, Scanner } from "./jslex";
+import { JSLex, Scanner, ScannerCallback } from "./jslex";
 
 export const TEX_UNARY_COMMANDS = [
     'sqrt',
@@ -70,7 +70,7 @@ function unescape(str: string): string {
     return str;
 }
 
-const rules_map = new Map<string, (a: Scanner<TexToken>) => TexToken | TexToken[]>([
+const rules_map = new Map<string, ScannerCallback<TexToken>>([
     // match `\begin{array}{cc}`
     [
         String.raw`\\begin{(array|subarry)}{(.+?)}`, (s) => {

@@ -3,14 +3,15 @@
  * Licensed under MIT license
  */
 
+export type ScannerCallback<T> = (a: Scanner<T>) => T | T[];
 
 interface ILexSpec<T> {
-    [key: string]: Map<string, (arg0: Scanner<T>) => T | T[]>;
+    [key: string]: Map<string, ScannerCallback<T>>;
 }
 
 interface IRule<T> {
     re: RegExp;
-    action: (a: Scanner<T>) => T | T[];
+    action: ScannerCallback<T>;
 }
 
 interface IMatch<T> {
