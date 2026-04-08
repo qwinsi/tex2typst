@@ -252,6 +252,9 @@ export class JSLex<T> {
             for (const [k,v] of rule_map.entries()) {
                 let re: RegExp;
                 try {
+                    // FIXME: e.g. "neg|norm" becomes /^neg|norm/,
+                    // but what we really want is /^(neg|norm)/ .
+                    // This will cause error when tokenize input like "...norm..."
                     re = new RegExp('^' + k);
                 } catch (err) {
                     throw "Invalid regexp '" + k + "' in state '" + s + "' (" + (err as Error).message + ")";
