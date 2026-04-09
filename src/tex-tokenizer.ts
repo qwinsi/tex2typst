@@ -1,5 +1,5 @@
 import { TexToken, TexTokenType } from "./tex-types";
-import { JSLex, Scanner, ScannerCallback } from "./jslex";
+import { JSLex, Scanner, ScannerCallback } from "./lex";
 
 export const TEX_UNARY_COMMANDS = [
     'sqrt',

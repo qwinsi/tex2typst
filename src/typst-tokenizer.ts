@@ -1,7 +1,7 @@
 import { TypstToken } from "./typst-types";
 import { TypstTokenType } from "./typst-types";
 import { reverseShorthandMap } from "./typst-shorthands";
-import { JSLex, Scanner, ScannerCallback } from "./jslex";
+import { JSLex, Scanner, ScannerCallback } from "./lex";
 
 const TYPST_SHORTHANDS = Array.from(reverseShorthandMap.keys());
 
