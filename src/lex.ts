@@ -1,4 +1,5 @@
 /**
+ * Last modified: 2026-04-09
  * Adapted from jslex - A lexer in JavaScript. https://github.com/jimbojw/jslex
  * Licensed under MIT license
  */
