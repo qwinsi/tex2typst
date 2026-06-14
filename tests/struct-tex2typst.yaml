@@ -505,3 +505,6 @@ cases:
   - title: text case 2
     tex: a\text       {This is a test.}a
     typst: a "This is a test." a
+  - title: h() should be rightSpaceful
+    tex: \!\left(x\right)
+    typst: "#h(-math.thin.amount) (x)"

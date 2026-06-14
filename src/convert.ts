@@ -87,9 +87,6 @@ function tex_token_to_typst(token: TexToken, options: Tex2TypstOptions): TypstTo
             if (token.value === '\\\\') {
                 // \\ -> \
                 return new TypstToken(TypstTokenType.CONTROL, '\\');
-            } else if (token.value === '\\!') {
-                // \! -> #h(-math.thin.amount)
-                return new TypstToken(TypstTokenType.SYMBOL, '#h(-math.thin.amount)');
             } else if (token.value === '~') {
                 // ~ -> space.nobreak
                 const typst_symbol = symbolMap.get('~')!;
@@ -215,6 +212,13 @@ export function convert_tex_node_to_typst(abstractNode: TexNode, options: Tex2Ty
     switch (abstractNode.type) {
         case 'terminal': {
             const node = abstractNode as TexTerminal;
+            // \! -> #h(-math.thin.amount)
+            if (node.head.eq(new TexToken(TexTokenType.CONTROL, '\\!'))) {
+                return new TypstFuncCall(
+                    new TypstToken(TypstTokenType.SYMBOL, '#h'),
+                    [new TypstToken(TypstTokenType.LITERAL, '-math.thin.amount').toNode()]
+                );
+            }
             return tex_token_to_typst(node.head, options).toNode();
         }
         case 'text': {
