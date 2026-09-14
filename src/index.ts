@@ -8,7 +8,7 @@ import { parseTypst } from "./typst-parser";
 import { TexWriter } from "./tex-writer";
 import { shorthandMap } from "./typst-shorthands";
 import { expand_tex_predefined_macros } from "./tex-semantic-analysis";
-import { expand_typst_predefined_variables } from "./typst-semantic-analyais";
+import { expand_typst_predefined_variables } from "./typst-semantic-analysis";
 
 
 export function tex2typst(tex: string, options: Partial<Tex2TypstOptions> = {}): string {

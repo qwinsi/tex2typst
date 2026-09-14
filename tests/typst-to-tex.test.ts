@@ -1,12 +1,8 @@
 
 import { describe, test, expect } from 'vitest';
-import { parseTypst } from '../src/typst-parser';
-import { TexWriter } from '../src/tex-writer';
-import { convert_typst_node_to_tex } from '../src/convert';
 import { loadTestCases, TestCase  } from './test-common';
 import { Typst2TexOptions } from '../src/exposed-types';
 import { typst2tex } from '../src';
-import { expand_typst_predefined_variables } from '../src/typst-semantic-analyais';
 
 const options: Typst2TexOptions = {
     blockMathMode: true,
