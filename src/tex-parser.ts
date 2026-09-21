@@ -116,7 +116,7 @@ export class LatexParser {
     public space_sensitive: boolean;
     public newline_sensitive: boolean;
 
-    // how many levels of \begin{...} \end{...} are we currently in
+    // how many levels of \begin{...} \end{...} are we currently inside
     public alignmentDepth: number = 0;
 
 
