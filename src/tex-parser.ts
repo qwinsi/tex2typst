@@ -126,7 +126,7 @@ export class LatexParser {
     }
 
     parse(tokens: TexToken[]): TexNode {
-        return this.parseGroup(tokens.slice(0));
+        return this.parseGroup(tokens);
     }
 
     parseGroup(tokens: TexToken[]): TexNode {
