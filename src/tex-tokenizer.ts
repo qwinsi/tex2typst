@@ -25,7 +25,6 @@ export const TEX_UNARY_COMMANDS = [
     'overbrace',
     'overline',
     'pmb',
-    'rm',
     'tilde',
     'underbrace',
     'underline',

@@ -67,7 +67,10 @@ export interface TexLeftRightData {
  * text: text enclosed by braces. e.g. \text{hello world}
  */
 type TexNodeType = 'terminal' | 'text' | 'ordgroup' | 'supsub'
-             | 'funcCall' | 'leftright' | 'beginend';
+             | 'funcCall' | 'styleSpan' | 'leftright' | 'beginend';
+
+export type TexHeightStyle = 'displaystyle' | 'textstyle';
+export type TexFontSwitch = 'rm' | 'it';
 
 
 export abstract class TexNode {
@@ -274,6 +277,43 @@ export class TexFuncCall extends TexNode {
     }
 }
 
+export class TexStyleSpan extends TexNode {
+    public body: TexNode;
+    public heightStyle: TexHeightStyle | null;
+    public fontSwitch: TexFontSwitch | null;
+
+    constructor(
+        body: TexNode,
+        heightStyle: TexHeightStyle | null = null,
+        fontSwitch: TexFontSwitch | null = null,
+    ) {
+        super('styleSpan', TexToken.EMPTY);
+        this.body = body;
+        this.heightStyle = heightStyle;
+        this.fontSwitch = fontSwitch;
+    }
+
+    public serialize(): TexToken[] {
+        const tokens: TexToken[] = [];
+        if (this.heightStyle) {
+            tokens.push(new TexToken(TexTokenType.COMMAND, `\\${this.heightStyle}`));
+        }
+        if (this.fontSwitch !== null) {
+            tokens.push(new TexToken(TexTokenType.COMMAND, `\\${this.fontSwitch}`));
+        }
+        return tokens.concat(this.body.serialize());
+    }
+
+    public bottomTopTraversalTransform(operationFn: (n: TexNode) => TexNode): TexNode {
+        const span = new TexStyleSpan(
+            this.body.bottomTopTraversalTransform(operationFn),
+            this.heightStyle,
+            this.fontSwitch,
+        );
+        return operationFn(span);
+    }
+}
+
 export class TexLeftRight extends TexNode {
     public body: TexNode;
     public left: TexToken | null;
@@ -395,5 +435,3 @@ export function writeTexTokenBuffer(buffer: string, token: TexToken): string {
 
     return buffer + str;
 }
-
-

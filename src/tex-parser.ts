@@ -58,30 +58,6 @@ function eat_primes(tokens: TexToken[], start: number): number {
 }
 
 
-function process_styled_parts(nodes: TexNode[]): TexNode[] {
-    let style_token: TexToken | null = null;
-    let bucket: TexNode[] = [];
-    let res: TexNode[] = [];
-    let i = 0;
-    while(true) {
-        if (i === nodes.length || nodes[i].head.eq(TexToken.COMMAND_DISPLAYSTYLE) || nodes[i].head.eq(TexToken.COMMAND_TEXTSTYLE)) {
-            if(bucket.length > 0) {
-                const g = (bucket.length === 1)? bucket[0]: new TexGroup(bucket);
-                res.push(style_token? new TexFuncCall(style_token, [g]): g);
-            }
-            if (i === nodes.length) {
-                break;
-            }
-            bucket = [];
-            style_token = nodes[i].head;
-        } else {
-            bucket.push(nodes[i]);
-        }
-        i++;
-    }
-    return res;
-}
-
 const LEFT_COMMAND: TexToken = new TexToken(TexTokenType.COMMAND, '\\left');
 const RIGHT_COMMAND: TexToken = new TexToken(TexTokenType.COMMAND, '\\right');
 
@@ -160,13 +136,11 @@ export class LatexParser {
             return [EMPTY_NODE, -1];
         }
 
-        const styledResults = process_styled_parts(results);
-
         let node: TexNode;
-        if (styledResults.length === 1) {
-            node = styledResults[0];
+        if (results.length === 1) {
+            node = results[0];
         } else {
-            node = new TexGroup(styledResults);
+            node = new TexGroup(results);
         }
         return [node, pos + 1];
     }

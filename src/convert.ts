@@ -1,4 +1,4 @@
-import { TexNode, TexToken, TexTokenType, TexFuncCall, TexGroup, TexSupSub,
+import { TexNode, TexToken, TexTokenType, TexFuncCall, TexGroup, TexStyleSpan, TexSupSub,
     TexText, TexBeginEnd, TexLeftRight, TexTerminal} from "./tex-types";
 import type { Tex2TypstOptions, Typst2TexOptions } from "./exposed-types";
 import { TypstFraction, TypstFuncCall, TypstGroup, TypstLeftright, TypstMarkupFunc, TypstMatrixLike, TypstNode, TypstSupsub, TypstTerminal } from "./typst-types";
@@ -230,6 +230,26 @@ export function convert_tex_node_to_typst(abstractNode: TexNode, options: Tex2Ty
             return new TypstGroup(
                 node.items.map((n) => convert_tex_node_to_typst(n, options))
             );
+        case 'styleSpan': {
+            const node = abstractNode as TexStyleSpan;
+            let result = convert_tex_node_to_typst(node.body, options);
+
+            if (node.fontSwitch !== null) {
+                const function_name = node.fontSwitch === 'it' ? 'italic' : 'upright';
+                result = new TypstFuncCall(
+                    new TypstToken(TypstTokenType.SYMBOL, function_name),
+                    [result],
+                );
+            }
+            if (node.heightStyle !== null) {
+                const function_name = node.heightStyle === 'displaystyle' ? 'display' : 'inline';
+                result = new TypstFuncCall(
+                    new TypstToken(TypstTokenType.SYMBOL, function_name),
+                    [result],
+                );
+            }
+            return result;
+        }
         case 'supsub': {
             const node = abstractNode as TexSupSub;
             let { base, sup, sub } = node;

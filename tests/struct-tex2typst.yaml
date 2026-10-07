@@ -508,3 +508,9 @@ cases:
   - title: h() should be rightSpaceful
     tex: \!\left(x\right)
     typst: "#h(-math.thin.amount) (x)"
+  - title: old \it, \rm
+    tex: "{\\it \\Omega}_{90} \\rm abc"
+    typst: italic(Omega)_90 upright(a b c)
+  - title: displaystyle and it
+    tex: a = \displaystyle b c \it d e \textstyle f
+    typst: a = display(b c) display(italic(d e)) inline(italic(f))

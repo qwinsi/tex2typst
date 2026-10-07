@@ -23,7 +23,7 @@ cases:
       nabla dot.op bold(B) &= 0 \
       nabla dot.op bold(D) &= rho
   - title: chemical equation example - bromoethane to ethanol
-    tex: \rm{CH_3CH_2Br} + \rm{OH}^- \longrightarrow \rm{CH_3CH_2OH} + \rm{Br}^-
+    tex: \mathrm{CH_3CH_2Br} + \mathrm{OH}^- \longrightarrow \mathrm{CH_3CH_2OH} + \mathrm{Br}^-
     typst: upright(C H_3 C H_2 B r) + upright(O H)^- --> upright(C H_3 C H_2 O H) + upright(B r)^-
   - title: harmonic series
     tex: \sum_{k=1}^n \frac{1}{k} = \ln n + \gamma + O\left(\frac{1}{n}\right)
