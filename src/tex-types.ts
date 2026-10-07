@@ -70,7 +70,7 @@ type TexNodeType = 'terminal' | 'text' | 'ordgroup' | 'supsub'
              | 'funcCall' | 'styleSpan' | 'leftright' | 'beginend';
 
 export type TexHeightStyle = 'displaystyle' | 'textstyle';
-export type TexFontSwitch = 'rm' | 'it';
+export type TexFontSwitch = 'rm' | 'it' | 'bf';
 
 
 export abstract class TexNode {

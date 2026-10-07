@@ -48,7 +48,7 @@ export function expand_tex_predefined_macros(node: TexNode): TexNode {
 function is_style_command(node: TexNode): boolean {
     return node.type === "terminal"
         && node.head.type === TexTokenType.COMMAND
-        && ['\\displaystyle', '\\textstyle', '\\rm', '\\it'].includes(node.head.value);
+        && ['\\displaystyle', '\\textstyle', '\\rm', '\\it', '\\bf'].includes(node.head.value);
 }
 
 function process_styled_group(node: TexNode): TexNode {
@@ -96,6 +96,9 @@ function process_styled_group(node: TexNode): TexNode {
                     break;
                 case '\\it':
                     next_font_switch = 'it';
+                    break;
+                case '\\bf':
+                    next_font_switch = 'bf';
                     break;
             }
             if (next_height_style !== height_style

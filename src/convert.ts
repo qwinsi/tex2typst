@@ -235,7 +235,11 @@ export function convert_tex_node_to_typst(abstractNode: TexNode, options: Tex2Ty
             let result = convert_tex_node_to_typst(node.body, options);
 
             if (node.fontSwitch !== null) {
-                const function_name = node.fontSwitch === 'it' ? 'italic' : 'upright';
+                const function_name = {
+                    rm: 'upright',
+                    it: 'italic',
+                    bf: 'bold',
+                }[node.fontSwitch];
                 result = new TypstFuncCall(
                     new TypstToken(TypstTokenType.SYMBOL, function_name),
                     [result],
