@@ -514,3 +514,6 @@ cases:
   - title: displaystyle and it
     tex: a = \displaystyle b c \it d e \textstyle f
     typst: a = display(b c) display(italic(d e)) inline(italic(f))
+  - title: combined absolute value bars
+    tex: \lvert a \rvert + \lVert b \rVert
+    typst: "| a | + || b ||"

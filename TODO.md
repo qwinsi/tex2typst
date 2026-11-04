@@ -19,3 +19,5 @@ b + b &= 0$)
 })
 ```
 (refer to https://github.com/typst/typst/issues/1478#issuecomment-2400899653)
+
+- In Typst, `| a |` and `|a|` are not looks the same. TeX `|a|` should convert to Typst `|a|` (not `| a |`).
